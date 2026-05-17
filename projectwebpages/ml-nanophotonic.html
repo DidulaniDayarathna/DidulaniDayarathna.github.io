@@ -1,0 +1,1544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ML for Nanophotonic Inverse Design – Acharige & Johlin 2022</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,700;1,9..144,300&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg:      #060810;
+    --surface: #0c0f1e;
+    --surface2:#131728;
+    --border:  rgba(255,255,255,0.07);
+    --text:    #dde2f0;
+    --muted:   #7b84a0;
+    --violet:  #9d7dff;
+    --cyan:    #38e8d8;
+    --amber:   #f7c843;
+    --rose:    #ff6b8a;
+    --lime:    #9dff6b;
+    --glow-v:  rgba(157,125,255,0.15);
+    --glow-c:  rgba(56,232,216,0.15);
+    --glow-a:  rgba(247,200,67,0.15);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Space Grotesk', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: radial-gradient(ellipse 80% 50% at 20% 10%, rgba(157,125,255,0.07) 0%, transparent 60%),
+                      radial-gradient(ellipse 60% 40% at 80% 80%, rgba(56,232,216,0.06) 0%, transparent 55%);
+    pointer-events: none; z-index: 0;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1rem 3rem;
+    background: rgba(6,8,16,0.88);
+    backdrop-filter: blur(18px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-brand { font-family: 'DM Mono', monospace; font-size: .78rem; letter-spacing: .14em; color: var(--violet); }
+  .nav-links { display: flex; gap: 2rem; list-style: none; }
+  .nav-links a { font-size: .8rem; text-decoration: none; color: var(--muted); letter-spacing: .04em; transition: color .2s; }
+  .nav-links a:hover { color: var(--text); }
+
+  .container { max-width: 1120px; margin: 0 auto; padding: 0 2rem; position: relative; z-index: 1; }
+
+  /* HERO */
+  #hero {
+    min-height: 100vh;
+    display: flex; flex-direction: column; justify-content: center;
+    padding: 8rem 2rem 5rem;
+    position: relative; overflow: hidden;
+  }
+  .hero-grid {
+    display: grid; grid-template-columns: 1fr; gap: 4rem; align-items: center;
+  }
+
+  .hero-tag {
+    display: inline-flex; align-items: center; gap: .6rem;
+    font-family: 'DM Mono', monospace; font-size: .72rem; letter-spacing: .12em;
+    color: var(--violet); border: 1px solid rgba(157,125,255,0.3);
+    background: rgba(157,125,255,0.07); padding: .3rem .85rem; border-radius: 2px;
+    margin-bottom: 1.6rem; animation: fadeUp .6s ease both;
+  }
+  .hero-tag::before { content: '◆'; font-size: .55rem; }
+
+  h1 {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(2.2rem, 4.5vw, 3.8rem);
+    line-height: 1.1; font-weight: 700; max-width: 700px;
+    animation: fadeUp .7s .1s ease both;
+  }
+  h1 em { font-style: italic; color: var(--cyan); font-weight: 300; }
+
+  .hero-meta { margin-top: 1.4rem; font-size: .88rem; color: var(--muted); animation: fadeUp .7s .2s ease both; }
+  .hero-meta span { color: var(--text); }
+
+  .tag-row { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: 2rem; animation: fadeUp .7s .3s ease both; }
+  .tag {
+    font-family: 'DM Mono', monospace; font-size: .68rem; letter-spacing: .07em;
+    padding: .25rem .7rem; border-radius: 2px; border: 1px solid;
+  }
+  .tag.v { color: var(--violet); border-color: rgba(157,125,255,.3); background: rgba(157,125,255,.06); }
+  .tag.c { color: var(--cyan);   border-color: rgba(56,232,216,.3);  background: rgba(56,232,216,.06); }
+  .tag.a { color: var(--amber);  border-color: rgba(247,200,67,.3);  background: rgba(247,200,67,.06); }
+  .tag.r { color: var(--rose);   border-color: rgba(255,107,138,.3); background: rgba(255,107,138,.06); }
+
+  .hero-cta { display: flex; gap: 1rem; margin-top: 2.4rem; flex-wrap: wrap; animation: fadeUp .7s .4s ease both; }
+  .btn-p {
+    display: inline-flex; align-items: center; gap: .45rem;
+    padding: .7rem 1.5rem; background: var(--violet); color: #06080f;
+    font-family: 'DM Mono', monospace; font-size: .78rem; letter-spacing: .06em;
+    text-decoration: none; border-radius: 3px; font-weight: 500;
+    transition: opacity .2s, transform .2s;
+  }
+  .btn-p:hover { opacity: .85; transform: translateY(-1px); }
+  .btn-s {
+    display: inline-flex; align-items: center; gap: .45rem;
+    padding: .7rem 1.5rem; background: transparent; color: var(--text);
+    font-family: 'DM Mono', monospace; font-size: .78rem; letter-spacing: .06em;
+    text-decoration: none; border: 1px solid var(--border); border-radius: 3px;
+    transition: border-color .2s;
+  }
+  .btn-s:hover { border-color: rgba(255,255,255,.25); }
+
+  /* Hero visual — nanoparticle grid demo */
+  .hero-visual { animation: fadeUp .8s .3s ease both; }
+  .hero-visual svg { width: 100%; height: auto; }
+
+  /* SECTIONS */
+  section { padding: 6rem 0; border-top: 1px solid var(--border); position: relative; }
+  .sec-label {
+    font-family: 'DM Mono', monospace; font-size: .68rem;
+    letter-spacing: .2em; color: var(--muted); text-transform: uppercase; margin-bottom: .9rem;
+  }
+  h2 {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(1.7rem, 3vw, 2.5rem);
+    font-weight: 700; line-height: 1.2; margin-bottom: 1.6rem;
+  }
+  h3 { font-size: 1rem; font-weight: 600; margin-bottom: .6rem; letter-spacing: .01em; }
+  p  { color: #bfc5d8; font-size: .94rem; margin-bottom: 1rem; }
+  p:last-child { margin-bottom: 0; }
+
+  /* DIAGRAM BOX */
+  .diagram-box {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; padding: 1.8rem; margin: 2rem 0;
+    overflow: hidden;
+  }
+  .diagram-box svg { width: 100%; height: auto; display: block; }
+  .diagram-title {
+    font-family: 'DM Mono', monospace; font-size: .68rem; letter-spacing: .16em;
+    text-transform: uppercase; color: var(--muted); text-align: center; margin-bottom: 1.2rem;
+  }
+
+  /* CALLOUT */
+  .callout {
+    border: 1px solid rgba(56,232,216,0.2);
+    border-left: 3px solid var(--cyan);
+    background: rgba(56,232,216,0.04);
+    border-radius: 4px; padding: 1.4rem 1.7rem; margin: 2rem 0;
+  }
+  .callout p { color: var(--text); font-size: .97rem; margin: 0; }
+
+  /* GRID CARDS */
+  .cards-grid { display: grid; gap: 1.2rem; margin-top: 2rem; }
+  .cards-2 { grid-template-columns: repeat(auto-fit, minmax(280px,1fr)); }
+  .cards-3 { grid-template-columns: repeat(auto-fit, minmax(240px,1fr)); }
+  .cards-4 { grid-template-columns: repeat(auto-fit, minmax(220px,1fr)); }
+
+  .card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; padding: 1.5rem 1.7rem;
+    transition: border-color .2s, transform .2s;
+    position: relative; overflow: hidden;
+  }
+  .card:hover { border-color: rgba(255,255,255,.14); transform: translateY(-2px); }
+  .card.cv { border-top: 2px solid rgba(157,125,255,.4); }
+  .card.cc { border-top: 2px solid rgba(56,232,216,.4); }
+  .card.ca { border-top: 2px solid rgba(247,200,67,.4); }
+  .card.cr { border-top: 2px solid rgba(255,107,138,.4); }
+  .card.cv h3 { color: var(--violet); }
+  .card.cc h3 { color: var(--cyan); }
+  .card.ca h3 { color: var(--amber); }
+  .card.cr h3 { color: var(--rose); }
+  .card p { font-size: .86rem; color: var(--muted); }
+  .card-icon { font-size: 1.5rem; margin-bottom: .8rem; display: block; }
+  .card-num {
+    font-family: 'Fraunces', serif; font-size: 3rem; font-weight: 700;
+    opacity: .1; position: absolute; top: .8rem; right: 1.2rem; line-height: 1;
+  }
+  .card.cv .card-num { color: var(--violet); }
+  .card.cc .card-num { color: var(--cyan); }
+  .card.ca .card-num { color: var(--amber); }
+  .card.cr .card-num { color: var(--rose); }
+
+  /* NETWORK TABS */
+  .ntabs { margin-top: 2rem; }
+  .ntab-buttons { display: flex; gap: 0; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+  .ntab-btn {
+    font-family: 'DM Mono', monospace; font-size: .75rem; letter-spacing: .05em;
+    padding: .8rem 1.3rem; background: none; border: none; color: var(--muted);
+    cursor: pointer; position: relative; transition: color .2s; white-space: nowrap;
+  }
+  .ntab-btn::after {
+    content:''; position: absolute; bottom: -1px; left: 0; right: 0; height: 2px;
+    background: transparent; transition: background .2s;
+  }
+  .ntab-btn.active { color: var(--text); }
+  .ntab-btn.active.tv::after { background: var(--violet); }
+  .ntab-btn.active.tc::after { background: var(--cyan); }
+  .ntab-btn.active.ta::after { background: var(--amber); }
+  .ntab-btn.active.tr::after { background: var(--rose); }
+  .ntab-btn.active.tl::after { background: var(--lime); }
+  .ntab-panel {
+    display: none; background: var(--surface); border: 1px solid var(--border);
+    border-top: none; border-radius: 0 0 8px 8px;
+    padding: 2rem; animation: fadeIn .25s ease;
+  }
+  .ntab-panel.active { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+  @media(max-width:640px){ .ntab-panel.active { grid-template-columns: 1fr; } }
+  .ntab-main h3 { font-size: 1rem; margin-bottom: .8rem; }
+  .ntab-main.tv h3 { color: var(--violet); }
+  .ntab-main.tc h3 { color: var(--cyan); }
+  .ntab-main.ta h3 { color: var(--amber); }
+  .ntab-main.tr h3 { color: var(--rose); }
+  .ntab-main.tl h3 { color: var(--lime); }
+  .ntab-main p { font-size: .88rem; color: var(--muted); line-height: 1.65; margin-bottom: .8rem; }
+  .meta-chips { display: flex; flex-direction: column; gap: .7rem; }
+  .meta-chip {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 6px; padding: .9rem 1.1rem;
+  }
+  .meta-chip .ml { font-family:'DM Mono',monospace; font-size:.65rem; letter-spacing:.1em; text-transform:uppercase; margin-bottom:.25rem; }
+  .meta-chip.tv .ml { color: var(--violet); }
+  .meta-chip.tc .ml { color: var(--cyan); }
+  .meta-chip.ta .ml { color: var(--amber); }
+  .meta-chip.tr .ml { color: var(--rose); }
+  .meta-chip.tl .ml { color: var(--lime); }
+  .meta-chip .mv { font-size: .85rem; color: var(--text); line-height: 1.4; }
+
+  /* RESULTS STATS */
+  .stat-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px,1fr)); gap: 1rem; margin: 2rem 0; }
+  .stat-box {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 6px; padding: 1.4rem; text-align: center;
+  }
+  .stat-val {
+    font-family: 'Fraunces', serif; font-size: 2.2rem; font-weight: 700;
+    line-height: 1; margin-bottom: .4rem;
+  }
+  .stat-val.sv { color: var(--violet); }
+  .stat-val.sc { color: var(--cyan); }
+  .stat-val.sa { color: var(--amber); }
+  .stat-val.sr { color: var(--rose); }
+  .stat-desc { font-size: .78rem; color: var(--muted); line-height: 1.4; }
+
+  /* RESULT COMPARISON TABLE */
+  .compare-table { width: 100%; border-collapse: collapse; margin: 2rem 0; font-size: .85rem; }
+  .compare-table th, .compare-table td { padding: .9rem 1.1rem; border-bottom: 1px solid var(--border); text-align: left; }
+  .compare-table th { font-family: 'DM Mono', monospace; font-size: .7rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+  .compare-table tbody tr:hover { background: var(--surface); }
+  .compare-table tbody tr:last-child td { border-bottom: none; }
+  .dot-g { width: 9px; height: 9px; border-radius: 50%; display: inline-block; background: var(--cyan); box-shadow: 0 0 5px rgba(56,232,216,.5); }
+  .dot-y { width: 9px; height: 9px; border-radius: 50%; display: inline-block; background: var(--amber); box-shadow: 0 0 5px rgba(247,200,67,.4); }
+  .dot-r { width: 9px; height: 9px; border-radius: 50%; display: inline-block; background: var(--rose); opacity: .6; }
+  .best-tag { font-family:'DM Mono',monospace; font-size:.65rem; color: var(--cyan); border:1px solid rgba(56,232,216,.3); border-radius:2px; padding:.1rem .4rem; margin-left:.4rem; }
+
+  /* TAKEAWAY */
+  .takeaway {
+    background: linear-gradient(135deg, rgba(157,125,255,.06), rgba(56,232,216,.03));
+    border: 1px solid rgba(157,125,255,.2);
+    border-radius: 8px; padding: 2.4rem; text-align: center; margin: 2.5rem 0;
+  }
+  .takeaway h3 { font-family:'Fraunces',serif; font-size:1.5rem; font-weight:700; margin-bottom: 1rem; }
+  .takeaway p { max-width: 700px; margin: 0 auto; color: var(--muted); }
+
+  /* WHAT'S NEXT */
+  .next-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(270px,1fr)); gap: 1.4rem; margin-top: 2rem; }
+  .next-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; padding: 1.8rem;
+    transition: border-color .2s, transform .2s;
+  }
+  .next-card:hover { border-color: rgba(255,255,255,.14); transform: translateY(-2px); }
+  .next-card-num { font-family:'DM Mono',monospace; font-size:.66rem; letter-spacing:.12em; color: var(--muted); display:block; margin-bottom:.7rem; }
+  .next-card h3 { font-size:.98rem; color: var(--text); margin-bottom:.6rem; font-weight:600; }
+  .next-card p { font-size:.86rem; color: var(--muted); line-height:1.6; margin:0; }
+  .next-card.n1 { border-top: 2px solid rgba(157,125,255,.4); }
+  .next-card.n2 { border-top: 2px solid rgba(56,232,216,.4); }
+  .next-card.n3 { border-top: 2px solid rgba(247,200,67,.4); }
+
+  footer { border-top: 1px solid var(--border); padding: 3rem 0; text-align: center; }
+  footer p { font-size: .8rem; color: var(--muted); }
+  footer a { color: var(--violet); text-decoration: none; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(18px); }
+    to   { opacity: 1; transform: none; }
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(5px); }
+    to   { opacity: 1; transform: none; }
+  }
+  @media(max-width:700px){
+    nav { padding: 1rem 1.2rem; }
+    .nav-links { display: none; }
+    h1 { font-size: 1.9rem; }
+    .ntab-btn { font-size: .68rem; padding: .7rem .8rem; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-brand">ML × NANOPHOTONICS / 2022</div>
+  <ul class="nav-links">
+    <li><a href="#overview">Overview</a></li>
+    <li><a href="#dataset">Dataset</a></li>
+    <li><a href="#forward">Forward Networks</a></li>
+    <li><a href="#inverse">Inverse Networks</a></li>
+    <li><a href="#results">Results</a></li>
+    <li><a href="#next">Future Work</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="container">
+    <div class="hero-grid">
+      <div class="hero-inner">
+        <div class="hero-tag">Published · ACS Omega 7(37), 2022</div>
+        <h1>Machine Learning in <em>Interpolation and Extrapolation</em> for Nanophotonic Inverse Design</h1>
+        <p class="hero-meta">
+          <span>Didulani Acharige</span> &amp; <span>Eric Johlin</span>
+          &nbsp;·&nbsp; Dept. of Mechanical &amp; Materials Engineering, Western University
+        </p>
+        <div class="tag-row">
+          <span class="tag v">Deep Learning</span>
+          <span class="tag v">Neural Networks</span>
+          <span class="tag c">Inverse Design</span>
+          <span class="tag c">Nanophotonics</span>
+          <span class="tag a">Forward Modeling</span>
+          <span class="tag a">ResNet50</span>
+          <span class="tag r">PCA + DNN</span>
+          <span class="tag r">FDTD Simulation</span>
+          <span class="tag v">Autoencoder</span>
+          <span class="tag c">Silicon Nanoparticles</span>
+        </div>
+        <div class="hero-cta">
+          <a href="https://pubs.acs.org/doi/full/10.1021/acsomega.2c04526" target="_blank" class="btn-p">↗ Read the Paper</a>
+          <a href="#overview" class="btn-s">Explore Project ↓</a>
+        </div>
+      </div>
+
+      <!-- Hero visual removed -->
+      <div class="hero-visual" style="display:none;">
+        <svg viewBox="0 0 380 380" xmlns="http://www.w3.org/2000/svg" font-family="'DM Mono',monospace">
+          <defs>
+            <filter id="glow-v"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+            <filter id="glow-c"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+          </defs>
+
+          <!-- Outer container -->
+          <rect x="10" y="10" width="360" height="360" rx="10" fill="rgba(12,15,30,0.9)" stroke="rgba(157,125,255,0.2)" stroke-width="1"/>
+          <text x="190" y="34" text-anchor="middle" font-size="9" fill="#7b84a0" letter-spacing="2">500 nm × 500 nm SILICON NANOPARTICLE</text>
+
+          <!-- 40×40 pixel grid simulation (showing a 20×20 representative section) -->
+          <!-- Left structure: interpolation example -->
+          <rect x="28" y="42" width="150" height="150" rx="3" fill="rgba(56,232,216,0.04)" stroke="rgba(56,232,216,0.2)" stroke-width="1"/>
+          <text x="103" y="58" text-anchor="middle" font-size="8" fill="#38e8d8" letter-spacing="1">INTERPOLATION</text>
+
+          <!-- Draw pixel grid for left structure (silicon = violet, air = dark) -->
+          <!-- Row by row, 10x10 grid showing inside the 150px box -->
+          <g transform="translate(30,62)">
+            <!-- Si pixels (yellow/violet when present) -->
+            <!-- Mimicking a blob-like nanoparticle shape -->
+            <rect x="0"  y="0"  width="13" height="13" fill="rgba(60,20,100,0.4)"/>
+            <rect x="13" y="0"  width="13" height="13" fill="rgba(60,20,100,0.4)"/>
+            <rect x="26" y="0"  width="13" height="13" fill="rgba(157,125,255,0.7)"/>
+            <rect x="39" y="0"  width="13" height="13" fill="rgba(157,125,255,0.7)"/>
+            <rect x="52" y="0"  width="13" height="13" fill="rgba(157,125,255,0.7)"/>
+            <rect x="65" y="0"  width="13" height="13" fill="rgba(60,20,100,0.4)"/>
+            <rect x="78" y="0"  width="13" height="13" fill="rgba(60,20,100,0.4)"/>
+            <rect x="91" y="0"  width="13" height="13" fill="rgba(157,125,255,0.7)"/>
+            <rect x="104" y="0" width="13" height="13" fill="rgba(60,20,100,0.4)"/>
+            <rect x="117" y="0" width="13" height="13" fill="rgba(60,20,100,0.4)"/>
+
+            <rect x="0"  y="13" width="13" height="13" fill="rgba(157,125,255,0.7)"/>
+            <rect x="13" y="13" width="13" height="13" fill="rgba(157,125,255,0.7)"/>
+            <rect x="26" y="13" width="13" height="13" fill="rgba(157,125,255,0.85)"/>
+            <rect x="39" y="13" width="13" height="13" fill="rgba(157,125,255,0.85)"/>
+            <rect x="52" y="13" width="13" height="13" fill="rgba(60,20,100,0.4)"/>
+            <rect x="65" y="13" width="13" height="13" fill="rgba(157,125,255,0.7)"/>
+            <rect x="78" y="13" width="13" height="13" fill="rgba(157,125,255,0.7)"/>
+            <rect x="91" y="13" width="13" height="13" fill="rgba(60,20,100,0.4)"/>
+            <rect x="104" y="13" width="13" height="13" fill="rgba(157,125,255,0.7)"/>
+            <rect x="117" y="13" width="13" height="13" fill="rgba(157,125,255,0.7)"/>
+
+            <rect x="0"  y="26" width="13" height="13" fill="rgba(157,125,255,0.85)"/>
+            <rect x="13" y="26" width="13" height="13" fill="rgba(60,20,100,0.4)"/>
+            <rect x="26" y="26" width="13" height="13" fill="rgba(157,125,255,0.85)"/>
+            <rect x="39" y="26" width="13" height="13" fill="rgba(60,20,100,0.4)"/>
+            <rect x="52" y="26" width="13" height="13" fill="rgba(157,125,255,0.7)"/>
+            <rect x="65" y="26" width="13" height="13" fill="rgba(157,125,255,0.85)"/>
+            <rect x="78" y="26" width="13" height="13" fill="rgba(60,20,100,0.4)"/>
+            <rect x="91" y="26" width="13" height="13" fill="rgba(157,125,255,0.7)"/>
+            <rect x="104" y="26" width="13" height="13" fill="rgba(60,20,100,0.4)"/>
+            <rect x="117" y="26" width="13" height="13" fill="rgba(157,125,255,0.7)"/>
+
+            <rect x="0"  y="39" width="13" height="13" fill="rgba(60,20,100,0.4)"/>
+            <rect x="13" y="39" width="13" height="13" fill="rgba(157,125,255,0.7)"/>
+            <rect x="26" y="39" width="13" height="13" fill="rgba(157,125,255,0.7)"/>
+            <rect x="39" y="39" width="13" height="13" fill="rgba(157,125,255,0.85)"/>
+            <rect x="52" y="39" width="13" height="13" fill="rgba(157,125,255,0.85)"/>
+            <rect x="65" y="39" width="13" height="13" fill="rgba(60,20,100,0.4)"/>
+            <rect x="78" y="39" width="13" height="13" fill="rgba(157,125,255,0.7)"/>
+            <rect x="91" y="39" width="13" height="13" fill="rgba(157,125,255,0.7)"/>
+            <rect x="104" y="39" width="13" height="13" fill="rgba(157,125,255,0.85)"/>
+            <rect x="117" y="39" width="13" height="13" fill="rgba(60,20,100,0.4)"/>
+
+            <rect x="0"  y="52" width="13" height="13" fill="rgba(157,125,255,0.7)"/>
+            <rect x="13" y="52" width="13" height="13" fill="rgba(157,125,255,0.85)"/>
+            <rect x="26" y="52" width="13" height="13" fill="rgba(60,20,100,0.4)"/>
+            <rect x="39" y="52" width="13" height="13" fill="rgba(157,125,255,0.7)"/>
+            <rect x="52" y="52" width="13" height="13" fill="rgba(60,20,100,0.4)"/>
+            <rect x="65" y="52" width="13" height="13" fill="rgba(157,125,255,0.85)"/>
+            <rect x="78" y="52" width="13" height="13" fill="rgba(157,125,255,0.7)"/>
+            <rect x="91" y="52" width="13" height="13" fill="rgba(60,20,100,0.4)"/>
+            <rect x="104" y="52" width="13" height="13" fill="rgba(157,125,255,0.7)"/>
+            <rect x="117" y="52" width="13" height="13" fill="rgba(157,125,255,0.85)"/>
+
+            <rect x="0"  y="65" width="13" height="13" fill="rgba(60,20,100,0.4)"/>
+            <rect x="13" y="65" width="13" height="13" fill="rgba(157,125,255,0.7)"/>
+            <rect x="26" y="65" width="13" height="13" fill="rgba(157,125,255,0.85)"/>
+            <rect x="39" y="65" width="13" height="13" fill="rgba(60,20,100,0.4)"/>
+            <rect x="52" y="65" width="13" height="13" fill="rgba(157,125,255,0.7)"/>
+            <rect x="65" y="65" width="13" height="13" fill="rgba(157,125,255,0.7)"/>
+            <rect x="78" y="65" width="13" height="13" fill="rgba(157,125,255,0.85)"/>
+            <rect x="91" y="65" width="13" height="13" fill="rgba(157,125,255,0.7)"/>
+            <rect x="104" y="65" width="13" height="13" fill="rgba(60,20,100,0.4)"/>
+            <rect x="117" y="65" width="13" height="13" fill="rgba(60,20,100,0.4)"/>
+
+            <rect x="0"  y="78" width="13" height="13" fill="rgba(157,125,255,0.7)"/>
+            <rect x="13" y="78" width="13" height="13" fill="rgba(60,20,100,0.4)"/>
+            <rect x="26" y="78" width="13" height="13" fill="rgba(157,125,255,0.7)"/>
+            <rect x="39" y="78" width="13" height="13" fill="rgba(157,125,255,0.7)"/>
+            <rect x="52" y="78" width="13" height="13" fill="rgba(60,20,100,0.4)"/>
+            <rect x="65" y="78" width="13" height="13" fill="rgba(157,125,255,0.85)"/>
+            <rect x="78" y="78" width="13" height="13" fill="rgba(157,125,255,0.7)"/>
+            <rect x="91" y="78" width="13" height="13" fill="rgba(157,125,255,0.7)"/>
+            <rect x="104" y="78" width="13" height="13" fill="rgba(157,125,255,0.85)"/>
+            <rect x="117" y="78" width="13" height="13" fill="rgba(60,20,100,0.4)"/>
+
+            <rect x="0"  y="91" width="13" height="13" fill="rgba(60,20,100,0.4)"/>
+            <rect x="13" y="91" width="13" height="13" fill="rgba(157,125,255,0.85)"/>
+            <rect x="26" y="91" width="13" height="13" fill="rgba(60,20,100,0.4)"/>
+            <rect x="39" y="91" width="13" height="13" fill="rgba(157,125,255,0.7)"/>
+            <rect x="52" y="91" width="13" height="13" fill="rgba(157,125,255,0.85)"/>
+            <rect x="65" y="91" width="13" height="13" fill="rgba(60,20,100,0.4)"/>
+            <rect x="78" y="91" width="13" height="13" fill="rgba(157,125,255,0.7)"/>
+            <rect x="91" y="91" width="13" height="13" fill="rgba(60,20,100,0.4)"/>
+            <rect x="104" y="91" width="13" height="13" fill="rgba(157,125,255,0.7)"/>
+            <rect x="117" y="91" width="13" height="13" fill="rgba(157,125,255,0.7)"/>
+
+            <rect x="0"  y="104" width="13" height="13" fill="rgba(157,125,255,0.7)"/>
+            <rect x="13" y="104" width="13" height="13" fill="rgba(157,125,255,0.7)"/>
+            <rect x="26" y="104" width="13" height="13" fill="rgba(157,125,255,0.85)"/>
+            <rect x="39" y="104" width="13" height="13" fill="rgba(60,20,100,0.4)"/>
+            <rect x="52" y="104" width="13" height="13" fill="rgba(60,20,100,0.4)"/>
+            <rect x="65" y="104" width="13" height="13" fill="rgba(157,125,255,0.7)"/>
+            <rect x="78" y="104" width="13" height="13" fill="rgba(157,125,255,0.85)"/>
+            <rect x="91" y="104" width="13" height="13" fill="rgba(157,125,255,0.7)"/>
+            <rect x="104" y="104" width="13" height="13" fill="rgba(60,20,100,0.4)"/>
+            <rect x="117" y="104" width="13" height="13" fill="rgba(157,125,255,0.7)"/>
+
+            <rect x="0"  y="117" width="13" height="13" fill="rgba(60,20,100,0.4)"/>
+            <rect x="13" y="117" width="13" height="13" fill="rgba(157,125,255,0.7)"/>
+            <rect x="26" y="117" width="13" height="13" fill="rgba(60,20,100,0.4)"/>
+            <rect x="39" y="117" width="13" height="13" fill="rgba(157,125,255,0.7)"/>
+            <rect x="52" y="117" width="13" height="13" fill="rgba(157,125,255,0.85)"/>
+            <rect x="65" y="117" width="13" height="13" fill="rgba(157,125,255,0.7)"/>
+            <rect x="78" y="117" width="13" height="13" fill="rgba(60,20,100,0.4)"/>
+            <rect x="91" y="117" width="13" height="13" fill="rgba(157,125,255,0.7)"/>
+            <rect x="104" y="117" width="13" height="13" fill="rgba(157,125,255,0.7)"/>
+            <rect x="117" y="117" width="13" height="13" fill="rgba(60,20,100,0.4)"/>
+          </g>
+          <!-- Legend left -->
+          <rect x="29" y="195" width="10" height="10" fill="rgba(157,125,255,0.8)"/>
+          <text x="44" y="204" font-size="8" fill="#7b84a0">Silicon (Si)</text>
+          <rect x="85" y="195" width="10" height="10" fill="rgba(60,20,100,0.5)"/>
+          <text x="100" y="204" font-size="8" fill="#7b84a0">Air</text>
+
+          <!-- Spectrum curve below left -->
+          <rect x="28" y="212" width="150" height="60" rx="2" fill="rgba(56,232,216,0.04)" stroke="rgba(56,232,216,0.15)" stroke-width="1"/>
+          <text x="103" y="225" text-anchor="middle" font-size="7" fill="#38e8d8" letter-spacing="1">ABSORPTION SPECTRUM (400–600 nm)</text>
+          <polyline points="36,262 48,252 60,256 72,244 84,248 96,238 108,250 120,246 132,255 144,243 156,252 168,246" fill="none" stroke="rgba(56,232,216,0.8)" stroke-width="1.5" stroke-linejoin="round"/>
+
+          <!-- Divider -->
+          <line x1="190" y1="42" x2="190" y2="282" stroke="rgba(255,255,255,0.06)" stroke-width="1" stroke-dasharray="5,4"/>
+          <text x="190" y="168" text-anchor="middle" font-size="8" fill="#3d3f5a" transform="rotate(-90 190 168)">— vs —</text>
+
+          <!-- Right structure: extrapolation example (different shape) -->
+          <rect x="202" y="42" width="150" height="150" rx="3" fill="rgba(247,200,67,0.04)" stroke="rgba(247,200,67,0.2)" stroke-width="1"/>
+          <text x="277" y="58" text-anchor="middle" font-size="8" fill="#f7c843" letter-spacing="1">EXTRAPOLATION</text>
+
+          <g transform="translate(204,62)">
+            <rect x="0"  y="0"  width="13" height="13" fill="rgba(100,70,0,0.4)"/>
+            <rect x="13" y="0"  width="13" height="13" fill="rgba(247,200,67,0.75)"/>
+            <rect x="26" y="0"  width="13" height="13" fill="rgba(100,70,0,0.4)"/>
+            <rect x="39" y="0"  width="13" height="13" fill="rgba(247,200,67,0.75)"/>
+            <rect x="52" y="0"  width="13" height="13" fill="rgba(247,200,67,0.9)"/>
+            <rect x="65" y="0"  width="13" height="13" fill="rgba(247,200,67,0.75)"/>
+            <rect x="78" y="0"  width="13" height="13" fill="rgba(100,70,0,0.4)"/>
+            <rect x="91" y="0"  width="13" height="13" fill="rgba(247,200,67,0.75)"/>
+            <rect x="104" y="0" width="13" height="13" fill="rgba(100,70,0,0.4)"/>
+            <rect x="117" y="0" width="13" height="13" fill="rgba(247,200,67,0.9)"/>
+
+            <rect x="0"  y="13" width="13" height="13" fill="rgba(247,200,67,0.9)"/>
+            <rect x="13" y="13" width="13" height="13" fill="rgba(100,70,0,0.4)"/>
+            <rect x="26" y="13" width="13" height="13" fill="rgba(247,200,67,0.75)"/>
+            <rect x="39" y="13" width="13" height="13" fill="rgba(100,70,0,0.4)"/>
+            <rect x="52" y="13" width="13" height="13" fill="rgba(100,70,0,0.4)"/>
+            <rect x="65" y="13" width="13" height="13" fill="rgba(247,200,67,0.9)"/>
+            <rect x="78" y="13" width="13" height="13" fill="rgba(247,200,67,0.75)"/>
+            <rect x="91" y="13" width="13" height="13" fill="rgba(100,70,0,0.4)"/>
+            <rect x="104" y="13" width="13" height="13" fill="rgba(247,200,67,0.9)"/>
+            <rect x="117" y="13" width="13" height="13" fill="rgba(100,70,0,0.4)"/>
+
+            <rect x="0"  y="26" width="13" height="13" fill="rgba(100,70,0,0.4)"/>
+            <rect x="13" y="26" width="13" height="13" fill="rgba(247,200,67,0.75)"/>
+            <rect x="26" y="26" width="13" height="13" fill="rgba(247,200,67,0.9)"/>
+            <rect x="39" y="26" width="13" height="13" fill="rgba(247,200,67,0.75)"/>
+            <rect x="52" y="26" width="13" height="13" fill="rgba(100,70,0,0.4)"/>
+            <rect x="65" y="26" width="13" height="13" fill="rgba(247,200,67,0.75)"/>
+            <rect x="78" y="26" width="13" height="13" fill="rgba(247,200,67,0.9)"/>
+            <rect x="91" y="26" width="13" height="13" fill="rgba(100,70,0,0.4)"/>
+            <rect x="104" y="26" width="13" height="13" fill="rgba(247,200,67,0.75)"/>
+            <rect x="117" y="26" width="13" height="13" fill="rgba(247,200,67,0.9)"/>
+
+            <rect x="0"  y="39" width="13" height="13" fill="rgba(247,200,67,0.75)"/>
+            <rect x="13" y="39" width="13" height="13" fill="rgba(247,200,67,0.9)"/>
+            <rect x="26" y="39" width="13" height="13" fill="rgba(100,70,0,0.4)"/>
+            <rect x="39" y="39" width="13" height="13" fill="rgba(100,70,0,0.4)"/>
+            <rect x="52" y="39" width="13" height="13" fill="rgba(247,200,67,0.75)"/>
+            <rect x="65" y="39" width="13" height="13" fill="rgba(100,70,0,0.4)"/>
+            <rect x="78" y="39" width="13" height="13" fill="rgba(247,200,67,0.9)"/>
+            <rect x="91" y="39" width="13" height="13" fill="rgba(247,200,67,0.75)"/>
+            <rect x="104" y="39" width="13" height="13" fill="rgba(100,70,0,0.4)"/>
+            <rect x="117" y="39" width="13" height="13" fill="rgba(247,200,67,0.75)"/>
+
+            <rect x="0"  y="52" width="13" height="13" fill="rgba(100,70,0,0.4)"/>
+            <rect x="13" y="52" width="13" height="13" fill="rgba(100,70,0,0.4)"/>
+            <rect x="26" y="52" width="13" height="13" fill="rgba(247,200,67,0.75)"/>
+            <rect x="39" y="52" width="13" height="13" fill="rgba(247,200,67,0.9)"/>
+            <rect x="52" y="52" width="13" height="13" fill="rgba(100,70,0,0.4)"/>
+            <rect x="65" y="52" width="13" height="13" fill="rgba(247,200,67,0.75)"/>
+            <rect x="78" y="52" width="13" height="13" fill="rgba(100,70,0,0.4)"/>
+            <rect x="91" y="52" width="13" height="13" fill="rgba(247,200,67,0.9)"/>
+            <rect x="104" y="52" width="13" height="13" fill="rgba(247,200,67,0.75)"/>
+            <rect x="117" y="52" width="13" height="13" fill="rgba(100,70,0,0.4)"/>
+
+            <rect x="0"  y="65" width="13" height="13" fill="rgba(247,200,67,0.9)"/>
+            <rect x="13" y="65" width="13" height="13" fill="rgba(247,200,67,0.75)"/>
+            <rect x="26" y="65" width="13" height="13" fill="rgba(100,70,0,0.4)"/>
+            <rect x="39" y="65" width="13" height="13" fill="rgba(247,200,67,0.75)"/>
+            <rect x="52" y="65" width="13" height="13" fill="rgba(247,200,67,0.9)"/>
+            <rect x="65" y="65" width="13" height="13" fill="rgba(100,70,0,0.4)"/>
+            <rect x="78" y="65" width="13" height="13" fill="rgba(247,200,67,0.75)"/>
+            <rect x="91" y="65" width="13" height="13" fill="rgba(247,200,67,0.75)"/>
+            <rect x="104" y="65" width="13" height="13" fill="rgba(100,70,0,0.4)"/>
+            <rect x="117" y="65" width="13" height="13" fill="rgba(247,200,67,0.9)"/>
+
+            <rect x="0"  y="78" width="13" height="13" fill="rgba(100,70,0,0.4)"/>
+            <rect x="13" y="78" width="13" height="13" fill="rgba(247,200,67,0.9)"/>
+            <rect x="26" y="78" width="13" height="13" fill="rgba(247,200,67,0.75)"/>
+            <rect x="39" y="78" width="13" height="13" fill="rgba(100,70,0,0.4)"/>
+            <rect x="52" y="78" width="13" height="13" fill="rgba(247,200,67,0.75)"/>
+            <rect x="65" y="78" width="13" height="13" fill="rgba(247,200,67,0.9)"/>
+            <rect x="78" y="78" width="13" height="13" fill="rgba(100,70,0,0.4)"/>
+            <rect x="91" y="78" width="13" height="13" fill="rgba(247,200,67,0.75)"/>
+            <rect x="104" y="78" width="13" height="13" fill="rgba(247,200,67,0.9)"/>
+            <rect x="117" y="78" width="13" height="13" fill="rgba(100,70,0,0.4)"/>
+
+            <rect x="0"  y="91" width="13" height="13" fill="rgba(247,200,67,0.75)"/>
+            <rect x="13" y="91" width="13" height="13" fill="rgba(100,70,0,0.4)"/>
+            <rect x="26" y="91" width="13" height="13" fill="rgba(247,200,67,0.9)"/>
+            <rect x="39" y="91" width="13" height="13" fill="rgba(247,200,67,0.75)"/>
+            <rect x="52" y="91" width="13" height="13" fill="rgba(100,70,0,0.4)"/>
+            <rect x="65" y="91" width="13" height="13" fill="rgba(247,200,67,0.75)"/>
+            <rect x="78" y="91" width="13" height="13" fill="rgba(247,200,67,0.9)"/>
+            <rect x="91" y="91" width="13" height="13" fill="rgba(100,70,0,0.4)"/>
+            <rect x="104" y="91" width="13" height="13" fill="rgba(247,200,67,0.75)"/>
+            <rect x="117" y="91" width="13" height="13" fill="rgba(247,200,67,0.9)"/>
+
+            <rect x="0"  y="104" width="13" height="13" fill="rgba(100,70,0,0.4)"/>
+            <rect x="13" y="104" width="13" height="13" fill="rgba(247,200,67,0.75)"/>
+            <rect x="26" y="104" width="13" height="13" fill="rgba(100,70,0,0.4)"/>
+            <rect x="39" y="104" width="13" height="13" fill="rgba(247,200,67,0.9)"/>
+            <rect x="52" y="104" width="13" height="13" fill="rgba(247,200,67,0.75)"/>
+            <rect x="65" y="104" width="13" height="13" fill="rgba(100,70,0,0.4)"/>
+            <rect x="78" y="104" width="13" height="13" fill="rgba(247,200,67,0.75)"/>
+            <rect x="91" y="104" width="13" height="13" fill="rgba(247,200,67,0.9)"/>
+            <rect x="104" y="104" width="13" height="13" fill="rgba(100,70,0,0.4)"/>
+            <rect x="117" y="104" width="13" height="13" fill="rgba(247,200,67,0.75)"/>
+
+            <rect x="0"  y="117" width="13" height="13" fill="rgba(247,200,67,0.9)"/>
+            <rect x="13" y="117" width="13" height="13" fill="rgba(247,200,67,0.75)"/>
+            <rect x="26" y="117" width="13" height="13" fill="rgba(247,200,67,0.9)"/>
+            <rect x="39" y="117" width="13" height="13" fill="rgba(100,70,0,0.4)"/>
+            <rect x="52" y="117" width="13" height="13" fill="rgba(247,200,67,0.75)"/>
+            <rect x="65" y="117" width="13" height="13" fill="rgba(247,200,67,0.9)"/>
+            <rect x="78" y="117" width="13" height="13" fill="rgba(100,70,0,0.4)"/>
+            <rect x="91" y="117" width="13" height="13" fill="rgba(247,200,67,0.75)"/>
+            <rect x="104" y="117" width="13" height="13" fill="rgba(247,200,67,0.9)"/>
+            <rect x="117" y="117" width="13" height="13" fill="rgba(100,70,0,0.4)"/>
+          </g>
+
+          <!-- Spectrum below right - extrapolation, different peaks -->
+          <rect x="202" y="212" width="150" height="60" rx="2" fill="rgba(247,200,67,0.04)" stroke="rgba(247,200,67,0.15)" stroke-width="1"/>
+          <text x="277" y="225" text-anchor="middle" font-size="7" fill="#f7c843" letter-spacing="1">OUT-OF-DISTRIBUTION SPECTRUM</text>
+          <polyline points="210,270 222,260 234,270 246,250 258,265 270,240 282,260 294,244 306,268 318,254 330,266 342,248" fill="none" stroke="rgba(247,200,67,0.8)" stroke-width="1.5" stroke-linejoin="round"/>
+
+          <!-- Bottom labels -->
+          <text x="103" y="290" text-anchor="middle" font-size="9" fill="#38e8d8">Within Training Distribution</text>
+          <text x="277" y="290" text-anchor="middle" font-size="9" fill="#f7c843">Outside Training Distribution</text>
+
+          <!-- 10,000 samples note -->
+          <rect x="60" y="305" width="260" height="28" rx="4" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+          <text x="190" y="316" text-anchor="middle" font-size="8" fill="#7b84a0">10,000 FDTD simulations  ·  40 × 40 binary matrix  ·  MEEP software</text>
+          <text x="190" y="328" text-anchor="middle" font-size="8" fill="#7b84a0">Absorption enhancement  ·  400 – 600 nm wavelength range</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- SECTION 1: OVERVIEW -->
+<section id="overview">
+  <div class="container">
+    <div class="sec-label">Background</div>
+    <h2>The Nanophotonic Inverse Design Problem</h2>
+    <p>Nanophotonic structures manipulate light at the subwavelength scale. Their optical properties depend critically on geometry in a highly non-linear and counter-intuitive way. While <strong>forward design</strong> (predicting optical response from a known structure) can be simulated, <strong>inverse design</strong> is far harder: given a desired spectrum, what geometry produces it?</p>
+    <p>Traditional simulation-based approaches such as adjoint topology optimization are computationally expensive, can get trapped in local optima, and do not scale well. Machine learning offers a potential solution: networks trained on simulated data can predict optical responses orders of magnitude faster than FDTD simulation, and can also be configured to generate structures from desired spectra directly.</p>
+
+    <div class="callout">
+      <p>This paper systematically explores <strong>four forward networks</strong> and <strong>five inverse networks</strong> using diverse ML architectures, comparing their performance at <em>interpolation</em> (within the training distribution) and <em>extrapolation</em> (beyond the training distribution), revealing that good interpolation does not guarantee good extrapolation.</p>
+    </div>
+
+    <div class="diagram-box">
+      <div class="diagram-title">Interpolation vs. Extrapolation — Conceptual Illustration</div>
+      <svg viewBox="0 0 960 270" xmlns="http://www.w3.org/2000/svg" font-family="'Space Grotesk',sans-serif">
+        <defs>
+          <marker id="arr" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L7,3 z" fill="#7b84a0"/>
+          </marker>
+          <marker id="arr-c" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L7,3 z" fill="#38e8d8"/>
+          </marker>
+          <marker id="arr-a" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L7,3 z" fill="#f7c843"/>
+          </marker>
+        </defs>
+
+        <!-- Axis for spectrum space -->
+        <text x="480" y="22" text-anchor="middle" font-size="11" fill="#7b84a0" letter-spacing="2">OPTICAL RESPONSE (SPECTRUM) SPACE</text>
+
+        <!-- Training region ellipse -->
+        <ellipse cx="480" cy="155" rx="280" ry="70" fill="rgba(157,125,255,0.07)" stroke="rgba(157,125,255,0.3)" stroke-width="1.5" stroke-dasharray="6,4"/>
+        <text x="480" y="117" text-anchor="middle" font-size="10" fill="#9d7dff" letter-spacing="1">TRAINING DISTRIBUTION</text>
+        <text x="480" y="130" text-anchor="middle" font-size="9" fill="#7b84a0">8,000 spectra from simulated structures</text>
+
+        <!-- Training data points -->
+        <circle cx="350" cy="155" r="4" fill="rgba(157,125,255,0.8)"/>
+        <circle cx="390" cy="140" r="4" fill="rgba(157,125,255,0.8)"/>
+        <circle cx="430" cy="165" r="4" fill="rgba(157,125,255,0.8)"/>
+        <circle cx="470" cy="145" r="4" fill="rgba(157,125,255,0.8)"/>
+        <circle cx="510" cy="160" r="4" fill="rgba(157,125,255,0.8)"/>
+        <circle cx="550" cy="147" r="4" fill="rgba(157,125,255,0.8)"/>
+        <circle cx="590" cy="163" r="4" fill="rgba(157,125,255,0.8)"/>
+        <circle cx="365" cy="175" r="4" fill="rgba(157,125,255,0.8)"/>
+        <circle cx="405" cy="153" r="4" fill="rgba(157,125,255,0.8)"/>
+        <circle cx="445" cy="177" r="4" fill="rgba(157,125,255,0.8)"/>
+        <circle cx="485" cy="170" r="4" fill="rgba(157,125,255,0.8)"/>
+        <circle cx="525" cy="143" r="4" fill="rgba(157,125,255,0.8)"/>
+        <circle cx="565" cy="173" r="4" fill="rgba(157,125,255,0.8)"/>
+
+        <!-- Interpolation query point (inside) -->
+        <circle cx="490" cy="157" r="9" fill="rgba(56,232,216,0.15)" stroke="rgba(56,232,216,0.8)" stroke-width="2"/>
+        <circle cx="490" cy="157" r="3" fill="rgba(56,232,216,0.9)"/>
+        <text x="490" y="122" text-anchor="middle" font-size="9" fill="#38e8d8">Interpolation</text>
+        <text x="490" y="134" text-anchor="middle" font-size="8" fill="#38e8d8">Query</text>
+        <line x1="490" y1="137" x2="490" y2="148" stroke="#38e8d8" stroke-width="1" marker-end="url(#arr-c)"/>
+
+        <!-- Extrapolation query points (outside) — labels placed well above circles -->
+        <circle cx="160" cy="150" r="9" fill="rgba(247,200,67,0.15)" stroke="rgba(247,200,67,0.8)" stroke-width="2"/>
+        <circle cx="160" cy="150" r="3" fill="rgba(247,200,67,0.9)"/>
+        <text x="160" y="120" text-anchor="middle" font-size="9" fill="#f7c843">Extrapolation</text>
+        <text x="160" y="132" text-anchor="middle" font-size="8" fill="#f7c843">Target</text>
+        <line x1="160" y1="135" x2="160" y2="141" stroke="#f7c843" stroke-width="1" marker-end="url(#arr-a)"/>
+
+        <circle cx="800" cy="160" r="9" fill="rgba(247,200,67,0.15)" stroke="rgba(247,200,67,0.8)" stroke-width="2"/>
+        <circle cx="800" cy="160" r="3" fill="rgba(247,200,67,0.9)"/>
+        <text x="800" y="130" text-anchor="middle" font-size="9" fill="#f7c843">Extrapolation</text>
+        <text x="800" y="142" text-anchor="middle" font-size="8" fill="#f7c843">Target</text>
+        <line x1="800" y1="145" x2="800" y2="151" stroke="#f7c843" stroke-width="1" marker-end="url(#arr-a)"/>
+
+        <!-- Dashed lines from training to extrapolation -->
+        <line x1="200" y1="150" x2="278" y2="151" stroke="#f7c843" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arr-a)" opacity="0.6"/>
+        <line x1="760" y1="155" x2="682" y2="153" stroke="#f7c843" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arr-a)" opacity="0.6"/>
+
+        <!-- Legend -->
+        <circle cx="340" cy="240" r="5" fill="rgba(157,125,255,0.8)"/>
+        <text x="352" y="244" font-size="9" fill="#7b84a0">Training samples</text>
+        <circle cx="460" cy="240" r="5" fill="rgba(56,232,216,0.8)"/>
+        <text x="472" y="244" font-size="9" fill="#7b84a0">Interpolation query</text>
+        <circle cx="590" cy="240" r="5" fill="rgba(247,200,67,0.8)"/>
+        <text x="602" y="244" font-size="9" fill="#7b84a0">Extrapolation target</text>
+      </svg>
+    </div>
+
+    <!-- Core challenges -->
+    <div class="cards-grid cards-3">
+      <div class="card cv">
+        <span class="card-num">1</span>
+        <span class="card-icon">💻</span>
+        <h3>Computational Cost</h3>
+        <p>Full FDTD electromagnetic simulation of each candidate structure is prohibitively slow for large-scale search. Neural networks reduce inference time by orders of magnitude.</p>
+      </div>
+      <div class="card cc">
+        <span class="card-num">2</span>
+        <span class="card-icon">🎯</span>
+        <h3>No Global Optimum Guarantee</h3>
+        <p>Gradient-based simulation methods like adjoint optimization are sensitive to initialization and can converge to local optima rather than globally optimal structures.</p>
+      </div>
+      <div class="card ca">
+        <span class="card-num">3</span>
+        <span class="card-icon">📐</span>
+        <h3>Interpolation vs. Extrapolation Gap</h3>
+        <p>Networks that perform well on target spectra within their training distribution often fail dramatically on out-of-distribution targets, a critical and understudied limitation.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- SECTION 2: DATASET -->
+<section id="dataset">
+  <div class="container">
+    <div class="sec-label">Data & Simulation</div>
+    <h2>Silicon Nanoparticle Dataset</h2>
+    <p>A standardized benchmark dataset of silicon nanoparticles was generated to train and test all networks. The system is conceptually simple yet supports rich optical diversity, making it ideal for systematic ML comparison.</p>
+
+    <div class="stat-row">
+      <div class="stat-box"><div class="stat-val sv">10K</div><div class="stat-desc">Total structures simulated via FDTD (MEEP)</div></div>
+      <div class="stat-box"><div class="stat-val sc">40×40</div><div class="stat-desc">Binary pixel matrix per structure (presence/absence of Si)</div></div>
+      <div class="stat-box"><div class="stat-val sa">500nm</div><div class="stat-desc">Square cross-sectional constraint on nanoparticle size</div></div>
+      <div class="stat-box"><div class="stat-val sr">200nm</div><div class="stat-desc">Wavelength range: 400–600 nm (visible light)</div></div>
+    </div>
+
+    <!-- Dataset pipeline diagram -->
+    <div class="diagram-box">
+      <div class="diagram-title">Dataset Generation Pipeline</div>
+      <svg viewBox="0 0 960 180" xmlns="http://www.w3.org/2000/svg" font-family="'Space Grotesk',sans-serif">
+        <defs>
+          <marker id="a2" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L8,3 z" fill="#7b84a0"/>
+          </marker>
+        </defs>
+
+        <!-- Step 1: Random box generation -->
+        <rect x="20" y="30" width="160" height="110" rx="6" fill="rgba(157,125,255,0.07)" stroke="rgba(157,125,255,0.25)" stroke-width="1"/>
+        <text x="100" y="52" text-anchor="middle" font-size="10" fill="#9d7dff" letter-spacing="1">STEP 1</text>
+        <text x="100" y="67" text-anchor="middle" font-size="9" fill="#dde2f0">Random Box Addition</text>
+        <text x="100" y="82" text-anchor="middle" font-size="8" fill="#7b84a0">Random boxes of random</text>
+        <text x="100" y="94" text-anchor="middle" font-size="8" fill="#7b84a0">size placed on 40×40</text>
+        <text x="100" y="106" text-anchor="middle" font-size="8" fill="#7b84a0">binary matrix</text>
+        <text x="100" y="130" text-anchor="middle" font-size="8" fill="#9d7dff">Silicon=1, Air=0</text>
+
+        <line x1="180" y1="85" x2="202" y2="85" stroke="#7b84a0" stroke-width="1.2" marker-end="url(#a2)"/>
+
+        <!-- Step 2: Smoothing -->
+        <rect x="202" y="30" width="160" height="110" rx="6" fill="rgba(56,232,216,0.07)" stroke="rgba(56,232,216,0.25)" stroke-width="1"/>
+        <text x="282" y="52" text-anchor="middle" font-size="10" fill="#38e8d8" letter-spacing="1">STEP 2</text>
+        <text x="282" y="67" text-anchor="middle" font-size="9" fill="#dde2f0">Smoothing</text>
+        <text x="282" y="82" text-anchor="middle" font-size="8" fill="#7b84a0">Matrix smoothed to</text>
+        <text x="282" y="94" text-anchor="middle" font-size="8" fill="#7b84a0">create realistic</text>
+        <text x="282" y="106" text-anchor="middle" font-size="8" fill="#7b84a0">nanoparticle geometry</text>
+        <text x="282" y="130" text-anchor="middle" font-size="8" fill="#38e8d8">10,000 unique structures</text>
+
+        <line x1="362" y1="85" x2="384" y2="85" stroke="#7b84a0" stroke-width="1.2" marker-end="url(#a2)"/>
+
+        <!-- Step 3: FDTD Simulation -->
+        <rect x="384" y="30" width="180" height="110" rx="6" fill="rgba(247,200,67,0.07)" stroke="rgba(247,200,67,0.25)" stroke-width="1"/>
+        <text x="474" y="52" text-anchor="middle" font-size="10" fill="#f7c843" letter-spacing="1">STEP 3</text>
+        <text x="474" y="67" text-anchor="middle" font-size="9" fill="#dde2f0">FDTD Simulation (MEEP)</text>
+        <text x="474" y="82" text-anchor="middle" font-size="8" fill="#7b84a0">Open-source FDTD software</text>
+        <text x="474" y="94" text-anchor="middle" font-size="8" fill="#7b84a0">Simulate electromagnetic</text>
+        <text x="474" y="106" text-anchor="middle" font-size="8" fill="#7b84a0">response in 2D</text>
+        <text x="474" y="130" text-anchor="middle" font-size="8" fill="#f7c843">Fields decay by 10⁻⁶</text>
+
+        <line x1="564" y1="85" x2="586" y2="85" stroke="#7b84a0" stroke-width="1.2" marker-end="url(#a2)"/>
+
+        <!-- Step 4: Spectrum extraction -->
+        <rect x="586" y="30" width="160" height="110" rx="6" fill="rgba(255,107,138,0.07)" stroke="rgba(255,107,138,0.25)" stroke-width="1"/>
+        <text x="666" y="52" text-anchor="middle" font-size="10" fill="#ff6b8a" letter-spacing="1">STEP 4</text>
+        <text x="666" y="67" text-anchor="middle" font-size="9" fill="#dde2f0">Spectrum Extraction</text>
+        <text x="666" y="82" text-anchor="middle" font-size="8" fill="#7b84a0">Absorption enhancement</text>
+        <text x="666" y="94" text-anchor="middle" font-size="8" fill="#7b84a0">spectra extracted as</text>
+        <text x="666" y="106" text-anchor="middle" font-size="8" fill="#7b84a0">training labels</text>
+        <text x="666" y="130" text-anchor="middle" font-size="8" fill="#ff6b8a">400–600 nm range</text>
+
+        <line x1="746" y1="85" x2="768" y2="85" stroke="#7b84a0" stroke-width="1.2" marker-end="url(#a2)"/>
+
+        <!-- Step 5: Train/Test Split -->
+        <rect x="768" y="30" width="172" height="110" rx="6" fill="rgba(157,125,255,0.04)" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+        <text x="854" y="52" text-anchor="middle" font-size="10" fill="#dde2f0" letter-spacing="1">STEP 5</text>
+        <text x="854" y="67" text-anchor="middle" font-size="9" fill="#dde2f0">Train / Test Split</text>
+        <text x="854" y="82" text-anchor="middle" font-size="8" fill="#38e8d8">Interpolation set:</text>
+        <text x="854" y="94" text-anchor="middle" font-size="8" fill="#7b84a0">80% train / 20% val</text>
+        <text x="854" y="109" text-anchor="middle" font-size="8" fill="#f7c843">Extrapolation set:</text>
+        <text x="854" y="121" text-anchor="middle" font-size="8" fill="#7b84a0">Separate out-of-dist. structures</text>
+        <text x="854" y="133" text-anchor="middle" font-size="8" fill="#7b84a0">& spectra for testing</text>
+      </svg>
+    </div>
+
+    <p>The absorption enhancement spectra serve as <strong>labels</strong> for the forward networks (structure → spectrum) and as <strong>inputs</strong> for the inverse networks (spectrum → structure). Convergence of simulations was verified across resolution and boundary conditions.</p>
+  </div>
+</section>
+
+
+<!-- SECTION 3: FORWARD NETWORKS -->
+<section id="forward">
+  <div class="container">
+    <div class="sec-label">Forward Design</div>
+    <h2>Four Approaches to Forward Modeling</h2>
+    <p>Forward modeling predicts the optical response (absorption spectrum) from an input structural geometry. Four fundamentally different architectures were implemented and compared. The goal is to find the fastest, most accurate surrogate for full FDTD simulation.</p>
+
+    <!-- Forward network pipeline overview -->
+    <div class="diagram-box">
+      <div class="diagram-title">Forward Network Task: Structure → Spectrum</div>
+      <svg viewBox="0 0 960 200" xmlns="http://www.w3.org/2000/svg" font-family="'Space Grotesk',sans-serif">
+        <defs>
+          <marker id="af" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L8,3 z" fill="#38e8d8"/>
+          </marker>
+        </defs>
+
+        <!-- Input -->
+        <rect x="20" y="30" width="145" height="100" rx="5" fill="rgba(157,125,255,0.1)" stroke="rgba(157,125,255,0.4)" stroke-width="1.2"/>
+        <text x="92" y="58" text-anchor="middle" font-size="13" fill="#9d7dff">Input</text>
+        <text x="92" y="77" text-anchor="middle" font-size="11" fill="#dde2f0">40×40 Binary</text>
+        <text x="92" y="94" text-anchor="middle" font-size="11" fill="#dde2f0">Nanostructure</text>
+        <text x="92" y="111" text-anchor="middle" font-size="10" fill="#7b84a0">Si presence/absence</text>
+
+        <line x1="165" y1="80" x2="205" y2="80" stroke="#38e8d8" stroke-width="1.5" marker-end="url(#af)"/>
+        <text x="185" y="73" text-anchor="middle" font-size="9" fill="#7b84a0">1600-dim</text>
+
+        <!-- Four forward networks -->
+        <rect x="205" y="18" width="530" height="124" rx="6" fill="rgba(56,232,216,0.04)" stroke="rgba(56,232,216,0.15)" stroke-width="1"/>
+        <text x="470" y="10" text-anchor="middle" font-size="11" fill="#38e8d8" letter-spacing="1">FORWARD NETWORK (choose one architecture)</text>
+
+        <rect x="215" y="30" width="118" height="100" rx="4" fill="rgba(56,232,216,0.08)" stroke="rgba(56,232,216,0.3)" stroke-width="1"/>
+        <text x="274" y="54" text-anchor="middle" font-size="12" fill="#38e8d8">ResNet50</text>
+        <text x="274" y="72" text-anchor="middle" font-size="10" fill="#7b84a0">Pretrained on</text>
+        <text x="274" y="86" text-anchor="middle" font-size="10" fill="#7b84a0">ImageNet, fine-</text>
+        <text x="274" y="100" text-anchor="middle" font-size="10" fill="#7b84a0">tuned on spectra</text>
+        <text x="274" y="116" text-anchor="middle" font-size="9" fill="#9d7dff">Transfer learning</text>
+
+        <rect x="345" y="30" width="108" height="100" rx="4" fill="rgba(56,232,216,0.08)" stroke="rgba(56,232,216,0.3)" stroke-width="1"/>
+        <text x="399" y="54" text-anchor="middle" font-size="12" fill="#38e8d8">DNN</text>
+        <text x="399" y="72" text-anchor="middle" font-size="10" fill="#7b84a0">Deep fully-</text>
+        <text x="399" y="86" text-anchor="middle" font-size="10" fill="#7b84a0">connected layers</text>
+        <text x="399" y="100" text-anchor="middle" font-size="10" fill="#7b84a0">Flatten → FC</text>
+        <text x="399" y="116" text-anchor="middle" font-size="9" fill="#9d7dff">Simple baseline</text>
+
+        <rect x="465" y="30" width="108" height="100" rx="4" fill="rgba(56,232,216,0.08)" stroke="rgba(56,232,216,0.3)" stroke-width="1"/>
+        <text x="519" y="54" text-anchor="middle" font-size="12" fill="#38e8d8">CNN</text>
+        <text x="519" y="72" text-anchor="middle" font-size="10" fill="#7b84a0">Convolutional</text>
+        <text x="519" y="86" text-anchor="middle" font-size="10" fill="#7b84a0">layers extract</text>
+        <text x="519" y="100" text-anchor="middle" font-size="10" fill="#7b84a0">spatial features</text>
+        <text x="519" y="116" text-anchor="middle" font-size="9" fill="#9d7dff">Spatial hierarchy</text>
+
+        <rect x="585" y="30" width="142" height="100" rx="4" fill="rgba(56,232,216,0.08)" stroke="rgba(56,232,216,0.3)" stroke-width="1"/>
+        <text x="656" y="54" text-anchor="middle" font-size="12" fill="#38e8d8">PCA + DNN</text>
+        <text x="656" y="72" text-anchor="middle" font-size="10" fill="#7b84a0">PCA compresses</text>
+        <text x="656" y="86" text-anchor="middle" font-size="10" fill="#7b84a0">structure to low-dim</text>
+        <text x="656" y="100" text-anchor="middle" font-size="10" fill="#7b84a0">components → DNN</text>
+        <text x="656" y="116" text-anchor="middle" font-size="9" fill="#9d7dff">Classical ML + ANN</text>
+
+        <line x1="735" y1="80" x2="775" y2="80" stroke="#38e8d8" stroke-width="1.5" marker-end="url(#af)"/>
+
+        <!-- Output -->
+        <rect x="775" y="30" width="168" height="100" rx="5" fill="rgba(247,200,67,0.1)" stroke="rgba(247,200,67,0.4)" stroke-width="1.2"/>
+        <text x="859" y="58" text-anchor="middle" font-size="13" fill="#f7c843">Output</text>
+        <text x="859" y="77" text-anchor="middle" font-size="11" fill="#dde2f0">Predicted Absorption</text>
+        <text x="859" y="94" text-anchor="middle" font-size="11" fill="#dde2f0">Enhancement Spectrum</text>
+        <text x="859" y="111" text-anchor="middle" font-size="10" fill="#7b84a0">vs. FDTD ground truth</text>
+      </svg>
+    </div>
+
+    <div class="ntabs">
+      <div class="ntab-buttons">
+        <button class="ntab-btn tv active" onclick="showFwd(event,'f1')">ResNet50</button>
+        <button class="ntab-btn tc"        onclick="showFwd(event,'f2')">DNN</button>
+        <button class="ntab-btn ta"        onclick="showFwd(event,'f3')">CNN</button>
+        <button class="ntab-btn tr"        onclick="showFwd(event,'f4')">PCA + DNN</button>
+      </div>
+
+      <div id="panel-f1" class="ntab-panel active">
+        <div class="ntab-main tv">
+          <h3>ResNet50: Pretrained Transfer Learning</h3>
+          <p>A ResNet50 architecture pretrained on ImageNet is fine-tuned on the nanophotonic dataset. This leverages the rich spatial feature representations already learned from millions of natural images to predict optical spectra from binary nanostructure images.</p>
+          <p>Transfer learning dramatically reduces training time, as most weights are already well-initialized. The model demonstrates strong performance in <strong>both interpolation and extrapolation</strong>, making it the most robust forward network tested. Very little additional training time is required beyond fine-tuning.</p>
+        </div>
+        <div class="meta-chips">
+          <div class="meta-chip tv"><div class="ml">Architecture</div><div class="mv">ResNet50 (50-layer residual CNN)</div></div>
+          <div class="meta-chip tv"><div class="ml">Pre-training</div><div class="mv">ImageNet (1M+ natural images)</div></div>
+          <div class="meta-chip tv"><div class="ml">Strength</div><div class="mv">Best extrapolation performance among forward networks</div></div>
+          <div class="meta-chip tv"><div class="ml">Key Advantage</div><div class="mv">Little additional training needed; robust spatial feature transfer</div></div>
+        </div>
+      </div>
+
+      <div id="panel-f2" class="ntab-panel">
+        <div class="ntab-main tc">
+          <h3>DNN: Deep Fully-Connected Network</h3>
+          <p>A traditional deep neural network with multiple fully-connected hidden layers. The 40×40 binary input matrix is flattened to a 1600-dimensional vector and passed through successive dense layers to predict the spectrum.</p>
+          <p>The DNN provides a clean baseline. Despite its simplicity, it performs competitively at interpolation and, importantly, <strong>outperforms more complex architectures at extrapolation</strong>. This counterintuitive result highlights the risk of overfitting spatial inductive biases to the training distribution.</p>
+        </div>
+        <div class="meta-chips">
+          <div class="meta-chip tc"><div class="ml">Architecture</div><div class="mv">Fully-connected dense layers</div></div>
+          <div class="meta-chip tc"><div class="ml">Input</div><div class="mv">Flattened 1600-dim binary vector</div></div>
+          <div class="meta-chip tc"><div class="ml">Strength</div><div class="mv">Surprisingly strong extrapolation performance</div></div>
+          <div class="meta-chip tc"><div class="ml">Key Finding</div><div class="mv">Simpler networks can generalize better to out-of-distribution samples</div></div>
+        </div>
+      </div>
+
+      <div id="panel-f3" class="ntab-panel">
+        <div class="ntab-main ta">
+          <h3>CNN: Convolutional Neural Network</h3>
+          <p>A convolutional neural network that applies learned spatial filters across the 40×40 input grid. Convolutional layers are designed to capture spatial hierarchies and local patterns, including silicon region shapes and their arrangements.</p>
+          <p>The CNN generally performs well at interpolation, benefiting from its ability to learn structure-specific spatial features. However, its extrapolation performance is <strong>worse than the simple DNN</strong>.</p>
+        </div>
+        <div class="meta-chips">
+          <div class="meta-chip ta"><div class="ml">Architecture</div><div class="mv">Convolutional layers + pooling + FC head</div></div>
+          <div class="meta-chip ta"><div class="ml">Input</div><div class="mv">40×40 binary image (spatial structure)</div></div>
+          <div class="meta-chip ta"><div class="ml">Strength</div><div class="mv">Interpolation accuracy; spatial feature learning</div></div>
+          <div class="meta-chip ta"><div class="ml">Weakness</div><div class="mv">Extrapolation suffers vs. simpler DNN</div></div>
+        </div>
+      </div>
+
+      <div id="panel-f4" class="ntab-panel">
+        <div class="ntab-main tr">
+          <h3>PCA + DNN: Classical ML + Neural Network Hybrid</h3>
+          <p>Principal Component Analysis (PCA) first reduces the 1600-dimensional binary structure to a compact set of principal components. These compressed representations are then fed into a DNN for spectrum prediction.</p>
+          <p>This combined approach <strong>achieves the lowest training loss and fastest convergence</strong> at interpolation, since PCA effectively removes noise and redundancy in the binary matrix. However, the dimensionality reduction may lose information critical for extrapolative generalization, leading to weaker out-of-distribution performance.</p>
+        </div>
+        <div class="meta-chips">
+          <div class="meta-chip tr"><div class="ml">Architecture</div><div class="mv">PCA dimensionality reduction → DNN</div></div>
+          <div class="meta-chip tr"><div class="ml">Compression</div><div class="mv">1600-dim → compact PCA components</div></div>
+          <div class="meta-chip tr"><div class="ml">Strength</div><div class="mv">Fastest convergence, lowest interpolation loss</div></div>
+          <div class="meta-chip tr"><div class="ml">Weakness</div><div class="mv">Reduced extrapolation performance</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- SECTION 4: INVERSE NETWORKS -->
+<section id="inverse">
+  <div class="container">
+    <div class="sec-label">Inverse Design</div>
+    <h2>Five Approaches to Inverse Design</h2>
+    <p>Inverse design generates candidate nanostructures from a desired target spectrum. This is significantly harder than forward modeling: the problem is non-unique (many structures can produce similar spectra), and the output is a high-dimensional binary image rather than a smooth spectrum curve. Five different inverse architectures were implemented.</p>
+
+    <!-- Inverse pipeline diagram -->
+    <div class="diagram-box">
+      <div class="diagram-title">Inverse Network Task: Target Spectrum → Generated Structures</div>
+      <svg viewBox="0 0 960 260" xmlns="http://www.w3.org/2000/svg" font-family="'Space Grotesk',sans-serif">
+        <defs>
+          <marker id="ai" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L8,3 z" fill="#9d7dff"/>
+          </marker>
+          <marker id="ai2" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L8,3 z" fill="#f7c843"/>
+          </marker>
+        </defs>
+
+        <!-- Input spectrum -->
+        <rect x="10" y="70" width="150" height="75" rx="5" fill="rgba(56,232,216,0.08)" stroke="rgba(56,232,216,0.3)" stroke-width="1.2"/>
+        <text x="85" y="93" text-anchor="middle" font-size="12" fill="#38e8d8">Target Spectrum</text>
+        <polyline points="20,130 34,120 48,126 62,111 76,118 90,105 104,116 118,110 132,121 146,115 158,108" fill="none" stroke="rgba(56,232,216,0.7)" stroke-width="1.4" stroke-linejoin="round"/>
+
+        <!-- Noise vector input -->
+        <rect x="10" y="162" width="150" height="46" rx="5" fill="rgba(157,125,255,0.06)" stroke="rgba(157,125,255,0.2)" stroke-width="1" stroke-dasharray="4,3"/>
+        <text x="85" y="183" text-anchor="middle" font-size="11" fill="#9d7dff">Noise Vector z</text>
+        <text x="85" y="199" text-anchor="middle" font-size="10" fill="#7b84a0">Random latent input</text>
+
+        <line x1="160" y1="107" x2="200" y2="107" stroke="#9d7dff" stroke-width="1.4" marker-end="url(#ai)"/>
+        <line x1="160" y1="183" x2="192" y2="152" stroke="rgba(157,125,255,0.5)" stroke-width="1" stroke-dasharray="3,2" marker-end="url(#ai)"/>
+
+        <!-- Inverse network box -->
+        <rect x="200" y="38" width="420" height="170" rx="6" fill="rgba(157,125,255,0.04)" stroke="rgba(157,125,255,0.2)" stroke-width="1"/>
+        <text x="410" y="58" text-anchor="middle" font-size="11" fill="#9d7dff" letter-spacing="1">INVERSE NETWORK (one of five architectures)</text>
+
+        <rect x="210" y="68" width="72" height="128" rx="4" fill="rgba(157,125,255,0.1)" stroke="rgba(157,125,255,0.3)" stroke-width="1"/>
+        <text x="246" y="90" text-anchor="middle" font-size="11" fill="#9d7dff">DNN</text>
+        <text x="246" y="108" text-anchor="middle" font-size="9" fill="#7b84a0">Fully-</text>
+        <text x="246" y="122" text-anchor="middle" font-size="9" fill="#7b84a0">connected</text>
+        <text x="246" y="136" text-anchor="middle" font-size="9" fill="#7b84a0">spectrum</text>
+        <text x="246" y="150" text-anchor="middle" font-size="9" fill="#7b84a0">→ struct</text>
+        <text x="246" y="186" text-anchor="middle" font-size="9" fill="#9d7dff">Best extrap</text>
+
+        <rect x="292" y="68" width="74" height="128" rx="4" fill="rgba(157,125,255,0.1)" stroke="rgba(157,125,255,0.3)" stroke-width="1"/>
+        <text x="329" y="90" text-anchor="middle" font-size="11" fill="#9d7dff">CNN</text>
+        <text x="329" y="104" text-anchor="middle" font-size="9" fill="#9d7dff">(Org)</text>
+        <text x="329" y="122" text-anchor="middle" font-size="9" fill="#7b84a0">CNN with</text>
+        <text x="329" y="136" text-anchor="middle" font-size="9" fill="#7b84a0">label spectra</text>
+        <text x="329" y="186" text-anchor="middle" font-size="9" fill="#9d7dff">Standard</text>
+
+        <rect x="376" y="68" width="74" height="128" rx="4" fill="rgba(157,125,255,0.1)" stroke="rgba(157,125,255,0.3)" stroke-width="1"/>
+        <text x="413" y="90" text-anchor="middle" font-size="11" fill="#9d7dff">CNN</text>
+        <text x="413" y="104" text-anchor="middle" font-size="9" fill="#9d7dff">(Fwd)</text>
+        <text x="413" y="122" text-anchor="middle" font-size="9" fill="#7b84a0">CNN labels</text>
+        <text x="413" y="136" text-anchor="middle" font-size="9" fill="#7b84a0">filtered via</text>
+        <text x="413" y="150" text-anchor="middle" font-size="9" fill="#7b84a0">fwd CNN</text>
+        <text x="413" y="186" text-anchor="middle" font-size="9" fill="#9d7dff">Tandem</text>
+
+        <rect x="460" y="68" width="74" height="128" rx="4" fill="rgba(157,125,255,0.1)" stroke="rgba(157,125,255,0.3)" stroke-width="1"/>
+        <text x="497" y="88" text-anchor="middle" font-size="11" fill="#9d7dff">AE+DNN</text>
+        <text x="497" y="108" text-anchor="middle" font-size="9" fill="#7b84a0">Autoencoder</text>
+        <text x="497" y="122" text-anchor="middle" font-size="9" fill="#7b84a0">compresses</text>
+        <text x="497" y="136" text-anchor="middle" font-size="9" fill="#7b84a0">then DNN</text>
+        <text x="497" y="186" text-anchor="middle" font-size="9" fill="#9d7dff">Latent codes</text>
+
+        <rect x="544" y="68" width="68" height="128" rx="4" fill="rgba(157,125,255,0.1)" stroke="rgba(157,125,255,0.3)" stroke-width="1"/>
+        <text x="578" y="88" text-anchor="middle" font-size="11" fill="#9d7dff">PCA</text>
+        <text x="578" y="104" text-anchor="middle" font-size="9" fill="#9d7dff">+DNN</text>
+        <text x="578" y="122" text-anchor="middle" font-size="9" fill="#7b84a0">Inverse PCA</text>
+        <text x="578" y="136" text-anchor="middle" font-size="9" fill="#7b84a0">from PCA</text>
+        <text x="578" y="186" text-anchor="middle" font-size="9" fill="#9d7dff">Fastest</text>
+
+        <line x1="620" y1="132" x2="656" y2="132" stroke="#9d7dff" stroke-width="1.4" marker-end="url(#ai)"/>
+        <text x="638" y="123" text-anchor="middle" font-size="9" fill="#7b84a0">generates</text>
+
+        <!-- Output: multiple structures -->
+        <rect x="658" y="58" width="92" height="110" rx="5" fill="rgba(247,200,67,0.07)" stroke="rgba(247,200,67,0.3)" stroke-width="1.2"/>
+        <text x="704" y="80" text-anchor="middle" font-size="11" fill="#f7c843">Structure 1</text>
+        <text x="704" y="96" text-anchor="middle" font-size="9" fill="#7b84a0">noise vec z₁</text>
+        <rect x="666" y="104" width="32" height="32" rx="1" fill="rgba(157,125,255,0.4)"/>
+        <rect x="702" y="104" width="32" height="32" rx="1" fill="rgba(157,125,255,0.25)"/>
+        <rect x="666" y="122" width="32" height="32" rx="1" fill="rgba(157,125,255,0.3)"/>
+        <rect x="702" y="122" width="32" height="32" rx="1" fill="rgba(157,125,255,0.5)"/>
+
+        <rect x="758" y="58" width="92" height="110" rx="5" fill="rgba(247,200,67,0.07)" stroke="rgba(247,200,67,0.3)" stroke-width="1.2"/>
+        <text x="804" y="80" text-anchor="middle" font-size="11" fill="#f7c843">Structure 2</text>
+        <text x="804" y="96" text-anchor="middle" font-size="9" fill="#7b84a0">noise vec z₂</text>
+        <rect x="766" y="104" width="32" height="32" rx="1" fill="rgba(157,125,255,0.25)"/>
+        <rect x="802" y="104" width="32" height="32" rx="1" fill="rgba(157,125,255,0.55)"/>
+        <rect x="766" y="122" width="32" height="32" rx="1" fill="rgba(157,125,255,0.45)"/>
+        <rect x="802" y="122" width="32" height="32" rx="1" fill="rgba(157,125,255,0.2)"/>
+
+        <rect x="858" y="58" width="92" height="110" rx="5" fill="rgba(247,200,67,0.07)" stroke="rgba(247,200,67,0.3)" stroke-width="1.2"/>
+        <text x="904" y="80" text-anchor="middle" font-size="11" fill="#f7c843">Structure N</text>
+        <text x="904" y="96" text-anchor="middle" font-size="9" fill="#7b84a0">noise vec zₙ</text>
+        <text x="904" y="130" text-anchor="middle" font-size="14" fill="#7b84a0">···</text>
+
+        <text x="795" y="225" text-anchor="middle" font-size="11" fill="#7b84a0">Diverse structures generated by varying noise vector — all targeting same spectrum</text>
+      </svg>
+    </div>
+
+    <div class="ntabs" style="margin-top:2rem;">
+      <div class="ntab-buttons">
+        <button class="ntab-btn tv active" onclick="showInv(event,'i1')">DNN</button>
+        <button class="ntab-btn tc"        onclick="showInv(event,'i2')">CNN (Org)</button>
+        <button class="ntab-btn ta"        onclick="showInv(event,'i3')">CNN (Fwd)</button>
+        <button class="ntab-btn tr"        onclick="showInv(event,'i4')">Autoencoder + DNN</button>
+        <button class="ntab-btn tl"        onclick="showInv(event,'i5')">PCA + DNN</button>
+      </div>
+
+      <div id="panel-i1" class="ntab-panel active">
+        <div class="ntab-main tv">
+          <h3>Inverse DNN: Fully-Connected for Inverse Design</h3>
+          <p>A fully-connected deep neural network takes the target absorption spectrum as input and generates a 40×40 binary nanostructure directly. A noise vector is concatenated to the spectrum input, enabling the network to generate diverse candidate structures for the same target.</p>
+          <p>The DNN inverse network is the <strong>top performer for extrapolation</strong> among all five inverse networks. Its simplicity avoids overfitting spatial biases to the training distribution, allowing more flexible structure generation. This result mirrors the forward network finding: simpler architectures can generalize better.</p>
+        </div>
+        <div class="meta-chips">
+          <div class="meta-chip tv"><div class="ml">Architecture</div><div class="mv">Fully-connected layers; spectrum + noise → structure</div></div>
+          <div class="meta-chip tv"><div class="ml">Training</div><div class="mv">Spectrum + noise vector → predicted structure → evaluate via FDTD labels</div></div>
+          <div class="meta-chip tv"><div class="ml">Key Result</div><div class="mv">Best extrapolation performance among all five inverse networks</div></div>
+          <div class="meta-chip tv"><div class="ml">Noise Role</div><div class="mv">Enables SIMO: multiple distinct structures per target spectrum</div></div>
+        </div>
+      </div>
+
+      <div id="panel-i2" class="ntab-panel">
+        <div class="ntab-main tc">
+          <h3>Inverse CNN (Original Labels): Convolutional Inverse</h3>
+          <p>A CNN-based inverse network trained directly with the original FDTD-generated spectra as ground-truth labels. The network must learn to decode a spectrum signal into a spatially structured 40×40 binary image.</p>
+          <p>CNN(Org) performs reasonably well at interpolation tasks. However, without filtering the labels through the forward network, there is a mismatch between the label spectra and the visual spatial structure the CNN learns to decode. Its extrapolation performance is moderate.</p>
+        </div>
+        <div class="meta-chips">
+          <div class="meta-chip tc"><div class="ml">Architecture</div><div class="mv">Transposed/deconvolution CNN</div></div>
+          <div class="meta-chip tc"><div class="ml">Labels</div><div class="mv">Original FDTD simulation spectra</div></div>
+          <div class="meta-chip tc"><div class="ml">Strength</div><div class="mv">Good spatial structure generation at interpolation</div></div>
+          <div class="meta-chip tc"><div class="ml">Limitation</div><div class="mv">Direct FDTD labels may not align with CNN-learned representations</div></div>
+        </div>
+      </div>
+
+      <div id="panel-i3" class="ntab-panel">
+        <div class="ntab-main ta">
+          <h3>Inverse CNN (Forward Filter): Tandem Architecture</h3>
+          <p>The CNN inverse network is trained in a tandem configuration: the generated structure is passed through a frozen pre-trained forward CNN, and the composite loss is computed on the <em>forward network's predicted spectrum</em> rather than the raw FDTD label.</p>
+          <p>This tandem training strategy improves consistency between the inverse network's output and the physical spectrum objective. It addresses the non-uniqueness problem by closing the forward-inverse loop. CNN(Fwd) shows <strong>improved consistency over CNN(Org)</strong> particularly for interpolative structures.</p>
+        </div>
+        <div class="meta-chips">
+          <div class="meta-chip ta"><div class="ml">Architecture</div><div class="mv">CNN inverse + frozen forward CNN (tandem)</div></div>
+          <div class="meta-chip ta"><div class="ml">Loss</div><div class="mv">Spectrum loss computed via forward network prediction</div></div>
+          <div class="meta-chip ta"><div class="ml">Strength</div><div class="mv">Better spectrum consistency; handles non-uniqueness</div></div>
+          <div class="meta-chip ta"><div class="ml">Design Pattern</div><div class="mv">Forward-inverse tandem; a foundational approach in nanophotonic ML</div></div>
+        </div>
+      </div>
+
+      <div id="panel-i4" class="ntab-panel">
+        <div class="ntab-main tr">
+          <h3>Autoencoder + DNN: Latent Space Design</h3>
+          <p>An autoencoder first learns a compact latent representation of the nanostructure space from all training structures. The DNN then learns to map from an input spectrum to this learned latent space. The decoder reconstructs the final structure from the latent code.</p>
+          <p>The autoencoder enforces a smooth, regularized latent structure representation. However, this two-stage approach shows <strong>weaker extrapolation performance</strong> than the simpler DNN, suggesting the latent space learned from training structures does not generalize well to novel out-of-distribution targets.</p>
+        </div>
+        <div class="meta-chips">
+          <div class="meta-chip tr"><div class="ml">Architecture</div><div class="mv">Autoencoder (encoder + decoder) + separate DNN mapping</div></div>
+          <div class="meta-chip tr"><div class="ml">Stage 1</div><div class="mv">Train autoencoder on all structures → compressed latent code</div></div>
+          <div class="meta-chip tr"><div class="ml">Stage 2</div><div class="mv">DNN learns: target spectrum → latent code → decoder → structure</div></div>
+          <div class="meta-chip tr"><div class="ml">Limitation</div><div class="mv">Extrapolation limited by training-distribution latent space</div></div>
+        </div>
+      </div>
+
+      <div id="panel-i5" class="ntab-panel">
+        <div class="ntab-main tl">
+          <h3>Inverse PCA + DNN: Classical Compression Route</h3>
+          <p>PCA decomposes all training structures into principal components. The DNN learns to predict the PCA coefficients from an input spectrum. The inverse PCA transform then reconstructs the candidate structure from those predicted coefficients.</p>
+          <p>PCA + DNN provides <strong>the fastest training time</strong> due to the small number of parameters in the DNN when operating in compressed PCA space. However, the extrapolation performance suffers relative to the DNN: PCA components fitted on the training set don't span the structure space needed for out-of-distribution generation.</p>
+        </div>
+        <div class="meta-chips">
+          <div class="meta-chip tl"><div class="ml">Architecture</div><div class="mv">PCA of training structures + DNN + inverse PCA</div></div>
+          <div class="meta-chip tl"><div class="ml">Speed</div><div class="mv">Fastest training among all five inverse networks</div></div>
+          <div class="meta-chip tl"><div class="ml">Strength</div><div class="mv">Compact representation; very low parameter count</div></div>
+          <div class="meta-chip tl"><div class="ml">Limitation</div><div class="mv">Extrapolation capability limited by training-distribution PCA basis</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- SECTION 5: RESULTS -->
+<section id="results">
+  <div class="container">
+    <div class="sec-label">Results & Key Findings</div>
+    <h2>Performance Across Architectures</h2>
+    <p>Networks were evaluated on two metrics for both forward and inverse tasks: Mean Squared Error (MSE) of spectrum reconstruction, and maximum absolute peak difference between predicted and true spectra. Both interpolation and extrapolation sets were assessed separately.</p>
+
+    <!-- Performance chart diagram -->
+    <div class="diagram-box">
+      <div class="diagram-title">Relative Performance Summary — Forward Networks (Interpolation vs. Extrapolation)</div>
+      <svg viewBox="0 0 960 250" xmlns="http://www.w3.org/2000/svg" font-family="'Space Grotesk',sans-serif">
+        <!-- Axes -->
+        <line x1="80" y1="30" x2="80" y2="190" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+        <line x1="80" y1="190" x2="940" y2="190" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+        <text x="40" y="110" text-anchor="middle" font-size="9" fill="#7b84a0" transform="rotate(-90 40 110)">MSE (lower = better)</text>
+        <text x="510" y="235" text-anchor="middle" font-size="9" fill="#7b84a0">Network Architecture</text>
+
+        <!-- Y axis ticks -->
+        <line x1="78" y1="50"  x2="82" y2="50"  stroke="#7b84a0" stroke-width="1"/><text x="72" y="53" text-anchor="end" font-size="7" fill="#7b84a0">High</text>
+        <line x1="78" y1="120" x2="82" y2="120" stroke="#7b84a0" stroke-width="1"/><text x="72" y="123" text-anchor="end" font-size="7" fill="#7b84a0">Med</text>
+        <line x1="78" y1="190" x2="82" y2="190" stroke="#7b84a0" stroke-width="1"/><text x="72" y="193" text-anchor="end" font-size="7" fill="#7b84a0">Low</text>
+
+        <!-- ResNet50 bars -->
+        <text x="155" y="222" text-anchor="middle" font-size="8" fill="#dde2f0">ResNet50</text>
+        <rect x="105" y="85" width="40" height="105" rx="2" fill="rgba(56,232,216,0.7)"/>
+        <rect x="155" y="70" width="40" height="120" rx="2" fill="rgba(247,200,67,0.7)"/>
+        <text x="125" y="80" text-anchor="middle" font-size="7" fill="#38e8d8">Interp</text>
+        <text x="175" y="65" text-anchor="middle" font-size="7" fill="#f7c843">Extrap</text>
+
+        <!-- DNN bars -->
+        <text x="305" y="222" text-anchor="middle" font-size="8" fill="#dde2f0">DNN</text>
+        <rect x="255" y="105" width="40" height="85" rx="2" fill="rgba(56,232,216,0.7)"/>
+        <rect x="305" y="80" width="40" height="110" rx="2" fill="rgba(247,200,67,0.7)"/>
+        <text x="275" y="100" text-anchor="middle" font-size="7" fill="#38e8d8">Interp</text>
+        <text x="325" y="75" text-anchor="middle" font-size="7" fill="#f7c843">Extrap</text>
+
+        <!-- CNN bars -->
+        <text x="455" y="222" text-anchor="middle" font-size="8" fill="#dde2f0">CNN</text>
+        <rect x="405" y="90" width="40" height="100" rx="2" fill="rgba(56,232,216,0.7)"/>
+        <rect x="455" y="110" width="40" height="80" rx="2" fill="rgba(247,200,67,0.7)"/>
+        <text x="425" y="85" text-anchor="middle" font-size="7" fill="#38e8d8">Interp</text>
+        <text x="475" y="105" text-anchor="middle" font-size="7" fill="#f7c843">Extrap</text>
+
+        <!-- PCA+DNN bars -->
+        <text x="610" y="222" text-anchor="middle" font-size="8" fill="#dde2f0">PCA+DNN</text>
+        <rect x="560" y="60" width="40" height="130" rx="2" fill="rgba(56,232,216,0.7)"/>
+        <rect x="610" y="130" width="40" height="60" rx="2" fill="rgba(247,200,67,0.7)"/>
+        <text x="580" y="55" text-anchor="middle" font-size="7" fill="#38e8d8">Interp ★</text>
+        <text x="630" y="125" text-anchor="middle" font-size="7" fill="#f7c843">Extrap</text>
+
+        <!-- Legend -->
+        <rect x="740" y="50" width="12" height="12" fill="rgba(56,232,216,0.7)"/>
+        <text x="758" y="61" font-size="9" fill="#7b84a0">Interpolation (in-distribution)</text>
+        <rect x="740" y="72" width="12" height="12" fill="rgba(247,200,67,0.7)"/>
+        <text x="758" y="83" font-size="9" fill="#7b84a0">Extrapolation (out-of-distribution)</text>
+
+        <text x="740" y="112" font-size="9" fill="#38e8d8">★ Best interpolation: PCA+DNN</text>
+        <text x="740" y="128" font-size="9" fill="#f7c843">★ Best extrapolation: ResNet50</text>
+        <text x="740" y="144" font-size="8" fill="#7b84a0">(lower bar = lower MSE = better)</text>
+        <text x="740" y="165" font-size="8" fill="#9d7dff">Note: Better interpolation ≠</text>
+        <text x="740" y="178" font-size="8" fill="#9d7dff">better extrapolation</text>
+      </svg>
+    </div>
+
+    <!-- Comparison table -->
+    <table class="compare-table">
+      <thead>
+        <tr>
+          <th>Architecture</th>
+          <th>Type</th>
+          <th>Interpolation</th>
+          <th>Extrapolation</th>
+          <th>Training Speed</th>
+          <th>Notes</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong style="color:var(--violet)">ResNet50</strong></td>
+          <td>Forward</td>
+          <td><span class="dot-g"></span> Strong</td>
+          <td><span class="dot-g"></span> Best <span class="best-tag">★</span></td>
+          <td><span class="dot-y"></span> Moderate</td>
+          <td>Transfer learning; generalizes best</td>
+        </tr>
+        <tr>
+          <td><strong style="color:var(--cyan)">DNN</strong></td>
+          <td>Forward</td>
+          <td><span class="dot-y"></span> Good</td>
+          <td><span class="dot-g"></span> Strong</td>
+          <td><span class="dot-g"></span> Fast</td>
+          <td>Surprisingly competitive; simple baseline</td>
+        </tr>
+        <tr>
+          <td><strong style="color:var(--amber)">CNN</strong></td>
+          <td>Forward</td>
+          <td><span class="dot-g"></span> Strong</td>
+          <td><span class="dot-y"></span> Moderate</td>
+          <td><span class="dot-y"></span> Moderate</td>
+          <td>Spatial features overfit to train dist.</td>
+        </tr>
+        <tr>
+          <td><strong style="color:var(--rose)">PCA + DNN</strong></td>
+          <td>Forward</td>
+          <td><span class="dot-g"></span> Best <span class="best-tag">★</span></td>
+          <td><span class="dot-r"></span> Weak</td>
+          <td><span class="dot-g"></span> Fastest</td>
+          <td>PCA loses extrap info; great for interpolation</td>
+        </tr>
+        <tr style="border-top:1px solid rgba(255,255,255,0.12)">
+          <td><strong style="color:var(--violet)">Inv. DNN</strong></td>
+          <td>Inverse</td>
+          <td><span class="dot-g"></span> Good</td>
+          <td><span class="dot-g"></span> Best <span class="best-tag">★</span></td>
+          <td><span class="dot-g"></span> Fast</td>
+          <td>Simplicity enables broader generalization</td>
+        </tr>
+        <tr>
+          <td><strong style="color:var(--cyan)">Inv. CNN (Org)</strong></td>
+          <td>Inverse</td>
+          <td><span class="dot-y"></span> Good</td>
+          <td><span class="dot-y"></span> Moderate</td>
+          <td><span class="dot-y"></span> Moderate</td>
+          <td>Spatial generation; label mismatch risk</td>
+        </tr>
+        <tr>
+          <td><strong style="color:var(--amber)">Inv. CNN (Fwd)</strong></td>
+          <td>Inverse</td>
+          <td><span class="dot-g"></span> Strong</td>
+          <td><span class="dot-y"></span> Moderate</td>
+          <td><span class="dot-y"></span> Moderate</td>
+          <td>Tandem loop; better spectrum consistency</td>
+        </tr>
+        <tr>
+          <td><strong style="color:var(--rose)">AE + DNN</strong></td>
+          <td>Inverse</td>
+          <td><span class="dot-y"></span> Moderate</td>
+          <td><span class="dot-r"></span> Weak</td>
+          <td><span class="dot-y"></span> Moderate</td>
+          <td>Latent space doesn't generalize</td>
+        </tr>
+        <tr>
+          <td><strong style="color:var(--lime)">PCA + DNN</strong></td>
+          <td>Inverse</td>
+          <td><span class="dot-y"></span> Good</td>
+          <td><span class="dot-r"></span> Weak</td>
+          <td><span class="dot-g"></span> Fastest</td>
+          <td>PCA basis can't span out-of-dist. structures</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Key result diagrams -->
+    <div class="diagram-box" style="margin-top:2.5rem;">
+      <div class="diagram-title">Inverse Network Training Time Comparison</div>
+      <svg viewBox="0 0 960 200" xmlns="http://www.w3.org/2000/svg" font-family="'Space Grotesk',sans-serif">
+        <!-- Horizontal bar chart for training time -->
+        <text x="480" y="22" text-anchor="middle" font-size="10" fill="#7b84a0">Total Training + Convergence Time (illustrative relative scale)</text>
+        <line x1="160" y1="40" x2="160" y2="178" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+
+        <!-- DNN bar -->
+        <text x="150" y="63" text-anchor="end" font-size="9" fill="#9d7dff">Inv. DNN</text>
+        <rect x="162" y="52" width="220" height="18" rx="2" fill="rgba(157,125,255,0.6)"/>
+        <text x="388" y="65" font-size="8" fill="#7b84a0"> ~Moderate</text>
+
+        <!-- CNN Org bar -->
+        <text x="150" y="93" text-anchor="end" font-size="9" fill="#38e8d8">CNN (Org)</text>
+        <rect x="162" y="82" width="480" height="18" rx="2" fill="rgba(56,232,216,0.5)"/>
+        <text x="648" y="95" font-size="8" fill="#7b84a0"> ~Long</text>
+
+        <!-- CNN Fwd bar -->
+        <text x="150" y="123" text-anchor="end" font-size="9" fill="#f7c843">CNN (Fwd)</text>
+        <rect x="162" y="112" width="540" height="18" rx="2" fill="rgba(247,200,67,0.5)"/>
+        <text x="708" y="125" font-size="8" fill="#7b84a0"> ~Longest CNN</text>
+
+        <!-- AE+DNN bar -->
+        <text x="150" y="153" text-anchor="end" font-size="9" fill="#ff6b8a">AE + DNN</text>
+        <rect x="162" y="142" width="340" height="18" rx="2" fill="rgba(255,107,138,0.5)"/>
+        <text x="508" y="155" font-size="8" fill="#7b84a0"> ~Long (2-stage)</text>
+
+        <!-- PCA+DNN bar -->
+        <text x="150" y="183" text-anchor="end" font-size="9" fill="#9dff6b">PCA + DNN</text>
+        <rect x="162" y="172" width="90" height="18" rx="2" fill="rgba(157,255,107,0.5)"/>
+        <text x="258" y="185" font-size="8" fill="#9dff6b"> ★ Fastest</text>
+      </svg>
+    </div>
+
+    <div class="cards-grid cards-2" style="margin-top:1.5rem;">
+      <div class="card cc">
+        <div class="card-accent"></div>
+        <h3>Key Finding: Interpolation ≠ Extrapolation</h3>
+        <p>Networks that achieve the <em>lowest</em> loss on in-distribution validation data do not necessarily perform best on out-of-distribution targets. PCA+DNN excels at interpolation but struggles with extrapolation, while the simple DNN shows the opposite trade-off.</p>
+      </div>
+      <div class="card cv">
+        <div class="card-accent"></div>
+        <h3>Transfer Learning Bridges the Gap</h3>
+        <p>ResNet50 achieves strong performance in <em>both</em> regimes by leveraging general visual features learned from ImageNet. Pretrained representations encode universal spatial concepts that transfer well beyond the training distribution of nanostructure geometries.</p>
+      </div>
+      <div class="card ca">
+        <div class="card-accent"></div>
+        <h3>Simple Beats Complex for Extrapolation</h3>
+        <p>In both forward and inverse design tasks, fully-connected DNNs outperform more architecturally complex models (CNNs, autoencoders) at extrapolation.</p>
+      </div>
+      <div class="card cr">
+        <div class="card-accent"></div>
+        <h3>Successful Out-of-Distribution Generation</h3>
+        <p>The inverse networks, particularly the DNN, were able to generate structures with spectral responses <em>significantly outside</em> the training distribution when using noise vector sampling, demonstrating genuine generative capability beyond simple interpolation.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- SECTION 6: NOISE VECTOR DESIGN -->
+<section id="generation">
+  <div class="container">
+    <div class="sec-label">Generative Capability</div>
+    <h2>Noise Vectors &amp; Diverse Structure Generation</h2>
+    <p>A key capability explored in this work is the use of random noise vectors to generate structurally diverse candidates from a single target spectrum. By sampling different noise vectors and passing each through the inverse network, the model produces multiple structurally distinct geometries, all targeting the same desired optical response.</p>
+
+    <!-- Noise vector generation diagram -->
+    <div class="diagram-box">
+      <div class="diagram-title">SIMO Generative Sampling — One Spectrum, Many Structures</div>
+      <svg viewBox="0 0 960 320" xmlns="http://www.w3.org/2000/svg" font-family="'Space Grotesk',sans-serif">
+        <defs>
+          <marker id="an" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L7,3 z" fill="#38e8d8"/>
+          </marker>
+          <marker id="an2" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L7,3 z" fill="#9d7dff"/>
+          </marker>
+        </defs>
+
+        <!-- Target spectrum box -->
+        <rect x="20" y="100" width="175" height="95" rx="6" fill="rgba(56,232,216,0.07)" stroke="rgba(56,232,216,0.3)" stroke-width="1.5"/>
+        <text x="108" y="125" text-anchor="middle" font-size="13" fill="#38e8d8">Target Spectrum</text>
+        <polyline points="30,175 50,162 68,170 88,153 108,160 128,147 148,158 166,152 185,163" fill="none" stroke="rgba(56,232,216,0.8)" stroke-width="1.8" stroke-linejoin="round"/>
+
+        <!-- Noise vectors -->
+        <rect x="20" y="218" width="55" height="36" rx="3" fill="rgba(157,125,255,0.08)" stroke="rgba(157,125,255,0.3)" stroke-width="1" stroke-dasharray="3,2"/>
+        <text x="47" y="241" text-anchor="middle" font-size="11" fill="#9d7dff">z₁</text>
+        <rect x="82" y="218" width="55" height="36" rx="3" fill="rgba(157,125,255,0.08)" stroke="rgba(157,125,255,0.3)" stroke-width="1" stroke-dasharray="3,2"/>
+        <text x="109" y="241" text-anchor="middle" font-size="11" fill="#9d7dff">z₂</text>
+        <rect x="144" y="218" width="52" height="36" rx="3" fill="rgba(157,125,255,0.08)" stroke="rgba(157,125,255,0.3)" stroke-width="1" stroke-dasharray="3,2"/>
+        <text x="170" y="241" text-anchor="middle" font-size="11" fill="#9d7dff">z₃ …</text>
+
+        <line x1="195" y1="148" x2="235" y2="148" stroke="#38e8d8" stroke-width="1.6" marker-end="url(#an)"/>
+        <line x1="100" y1="218" x2="237" y2="196" stroke="rgba(157,125,255,0.5)" stroke-width="1.2" stroke-dasharray="3,2" marker-end="url(#an2)"/>
+
+        <!-- Inverse network -->
+        <rect x="235" y="90" width="178" height="140" rx="6" fill="rgba(157,125,255,0.06)" stroke="rgba(157,125,255,0.25)" stroke-width="1.2"/>
+        <text x="324" y="118" text-anchor="middle" font-size="12" fill="#9d7dff" letter-spacing="1">INVERSE</text>
+        <text x="324" y="136" text-anchor="middle" font-size="12" fill="#9d7dff" letter-spacing="1">NETWORK</text>
+        <text x="324" y="160" text-anchor="middle" font-size="10" fill="#7b84a0">spectrum + noise</text>
+        <text x="324" y="176" text-anchor="middle" font-size="10" fill="#7b84a0">→ binary structure</text>
+        <text x="324" y="200" text-anchor="middle" font-size="10" fill="#7b84a0">DNN / CNN / AE / PCA</text>
+
+        <line x1="413" y1="148" x2="453" y2="116" stroke="#9d7dff" stroke-width="1.4" marker-end="url(#an2)"/>
+        <line x1="413" y1="148" x2="453" y2="148" stroke="#9d7dff" stroke-width="1.4" marker-end="url(#an2)"/>
+        <line x1="413" y1="148" x2="453" y2="180" stroke="#9d7dff" stroke-width="1.4" marker-end="url(#an2)"/>
+
+        <!-- Three generated structures -->
+        <rect x="455" y="60" width="135" height="96" rx="5" fill="rgba(157,125,255,0.06)" stroke="rgba(157,125,255,0.3)" stroke-width="1"/>
+        <text x="522" y="82" text-anchor="middle" font-size="11" fill="#9d7dff">Structure (z₁)</text>
+        <rect x="464" y="90" width="32" height="32" rx="1" fill="rgba(157,125,255,0.55)"/>
+        <rect x="500" y="90" width="32" height="32" rx="1" fill="rgba(157,125,255,0.2)"/>
+        <rect x="464" y="124" width="32" height="22" rx="1" fill="rgba(157,125,255,0.3)"/>
+        <rect x="500" y="124" width="32" height="22" rx="1" fill="rgba(157,125,255,0.6)"/>
+        <rect x="536" y="90" width="46" height="60" rx="1" fill="rgba(157,125,255,0.4)"/>
+
+        <rect x="455" y="172" width="135" height="96" rx="5" fill="rgba(157,125,255,0.06)" stroke="rgba(157,125,255,0.3)" stroke-width="1"/>
+        <text x="522" y="194" text-anchor="middle" font-size="11" fill="#9d7dff">Structure (z₂)</text>
+        <rect x="464" y="202" width="46" height="22" rx="1" fill="rgba(157,125,255,0.4)"/>
+        <rect x="514" y="202" width="20" height="22" rx="1" fill="rgba(157,125,255,0.2)"/>
+        <rect x="464" y="226" width="24" height="34" rx="1" fill="rgba(157,125,255,0.6)"/>
+        <rect x="492" y="226" width="40" height="34" rx="1" fill="rgba(157,125,255,0.3)"/>
+        <rect x="536" y="214" width="46" height="46" rx="1" fill="rgba(157,125,255,0.5)"/>
+
+        <!-- Different but same spectrum label -->
+        <text x="615" y="134" text-anchor="middle" font-size="11" fill="#7b84a0">Structurally</text>
+        <text x="615" y="150" text-anchor="middle" font-size="11" fill="#7b84a0">different</text>
+
+        <!-- Forward network validation -->
+        <line x1="592" y1="108" x2="650" y2="108" stroke="rgba(247,200,67,0.6)" stroke-width="1.2" marker-end="url(#an)"/>
+        <line x1="592" y1="220" x2="650" y2="220" stroke="rgba(247,200,67,0.6)" stroke-width="1.2" marker-end="url(#an)"/>
+
+        <rect x="650" y="65" width="198" height="260" rx="6" fill="rgba(247,200,67,0.05)" stroke="rgba(247,200,67,0.2)" stroke-width="1"/>
+        <text x="749" y="90" text-anchor="middle" font-size="12" fill="#f7c843">FDTD Validation</text>
+        <text x="749" y="108" text-anchor="middle" font-size="10" fill="#7b84a0">Both structures simulated</text>
+        <text x="749" y="122" text-anchor="middle" font-size="10" fill="#7b84a0">to confirm optical response</text>
+
+        <!-- Spec 1 -->
+        <text x="749" y="150" text-anchor="middle" font-size="11" fill="#38e8d8">Spec (z₁):</text>
+        <polyline points="660,170 676,161 692,166 708,153 724,160 740,150 756,158 772,154 788,163 804,157 820,165 836,160" fill="none" stroke="rgba(56,232,216,0.7)" stroke-width="1.5" stroke-linejoin="round"/>
+        <!-- Spec 2 -->
+        <text x="749" y="205" text-anchor="middle" font-size="11" fill="#38e8d8">Spec (z₂):</text>
+        <polyline points="660,222 676,215 692,220 708,209 724,216 740,206 756,213 772,209 788,218 804,212 820,220 836,215" fill="none" stroke="rgba(56,232,216,0.65)" stroke-width="1.5" stroke-linejoin="round" stroke-dasharray="4,2"/>
+
+        <text x="749" y="275" text-anchor="middle" font-size="11" fill="#38e8d8">Both spectra ≈ Target</text>
+        <text x="749" y="293" text-anchor="middle" font-size="10" fill="#7b84a0">Non-uniqueness exploited</text>
+
+        <!-- Extrapolation region label -->
+        <rect x="858" y="100" width="92" height="120" rx="5" fill="rgba(247,200,67,0.05)" stroke="rgba(247,200,67,0.2)" stroke-width="1" stroke-dasharray="4,3"/>
+        <text x="904" y="124" text-anchor="middle" font-size="11" fill="#f7c843">Extrap.</text>
+        <text x="904" y="140" text-anchor="middle" font-size="11" fill="#f7c843">Test Case</text>
+        <text x="904" y="160" text-anchor="middle" font-size="9" fill="#7b84a0">Target not in</text>
+        <text x="904" y="174" text-anchor="middle" font-size="9" fill="#7b84a0">training set</text>
+        <text x="904" y="188" text-anchor="middle" font-size="9" fill="#7b84a0">DNN best here</text>
+        <text x="904" y="208" text-anchor="middle" font-size="9" fill="#f7c843">10 noise vecs</text>
+      </svg>
+    </div>
+
+    <div class="callout">
+      <p>For each test spectrum (both interpolative and extrapolative), <strong>10 different noise vectors</strong> were sampled and 10 candidate structures generated. Performance was assessed both on average MSE across all 10, and on the best-performing structure (minimum error), to capture both consistency and peak capability of each network.</p>
+    </div>
+  </div>
+</section>
+
+
+<!-- SECTION 7: KEY TAKEAWAY -->
+<section id="takeaway">
+  <div class="container">
+    <div class="takeaway">
+      <h3>Core Conclusion</h3>
+      <p>Different machine learning architectures show fundamentally different aptitudes for interpolation versus extrapolation in nanophotonic inverse design. Combining classical ML (PCA) with ANNs achieves strong interpolation but weak extrapolation; transfer learning (ResNet50) bridges the gap most effectively. Critically, simple fully-connected DNNs outperform structurally complex architectures at extrapolation, challenging the intuition that architectural complexity always leads to better generalization. These networks can successfully generate structures with optical responses well outside their training distribution, demonstrating genuine ML-driven extrapolative design in nanophotonics.</p>
+    </div>
+    <p>This work positions ML not merely as an efficient proxy for simulation, but as a genuine design engine capable of exploring structure-performance spaces beyond what the training data directly covers. The systematic comparison across architectures provides practical guidance for researchers building ML pipelines for nanophotonic and broader photonic inverse design systems.</p>
+  </div>
+</section>
+
+
+<!-- SECTION 8: FUTURE WORK -->
+<section id="next">
+  <div class="container">
+    <div class="sec-label">Future Directions</div>
+    <h2>What's Next</h2>
+    <p>This work lays a systematic empirical foundation and opens several high-impact directions for future research.</p>
+    <div class="next-grid">
+      <div class="next-card n1">
+        <span class="next-card-num">DIRECTION 01</span>
+        <h3>Generative Tandem Networks with Noise Injection</h3>
+        <p>Building directly on this work, the GTNN framework (ACS Omega / Physica Scripta 2025) combines a noise-injected tandem inverse network with iterative transfer learning and a genetic algorithm, achieving diverse structure generation and extrapolative optimization simultaneously.</p>
+      </div>
+      <div class="next-card n2">
+        <span class="next-card-num">DIRECTION 02</span>
+        <h3>3D and Multi-Dimensional Structures</h3>
+        <p>Extending these ML architectures to three-dimensional nanostructures and multi-layer devices would dramatically expand the design space, enabling components like volumetric color splitters, metasurfaces, and broadband nanophotonic lenses.</p>
+      </div>
+      <div class="next-card n3">
+        <span class="next-card-num">DIRECTION 03</span>
+        <h3>Physics-Informed and Hybrid Approaches</h3>
+        <p>Incorporating physical constraints directly into network training, such as symmetry priors, Maxwell's equations, or fabrication constraints, could help close the interpolation–extrapolation performance gap while ensuring generated structures are physically and practically realizable.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- FOOTER -->
+<footer>
+  <div class="container">
+    <p style="margin-bottom:.6rem;">
+      <strong>Didulani Acharige</strong> &amp; <strong>Eric Johlin</strong> — Department of Mechanical &amp; Materials Engineering, Western University
+    </p>
+    <p>
+      Published in <em>ACS Omega</em>, Vol. 7, No. 37, pp. 33537–33547 (September 2022) &nbsp;·&nbsp;
+      DOI: <a href="https://pubs.acs.org/doi/full/10.1021/acsomega.2c04526" target="_blank">10.1021/acsomega.2c04526</a>
+      &nbsp;·&nbsp; PMCID: PMC9494689
+    </p>
+    <p style="margin-top:.5rem; font-size:.75rem;">Funded by NSERC and Mitacs</p>
+  </div>
+</footer>
+
+<script>
+  function showFwd(event, id) {
+    document.querySelectorAll('[id^="panel-f"]').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.ntab-buttons:first-of-type .ntab-btn, #forward .ntab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('panel-' + id).classList.add('active');
+    event.currentTarget.classList.add('active');
+  }
+  function showInv(event, id) {
+    document.querySelectorAll('[id^="panel-i"]').forEach(p => p.classList.remove('active'));
+    document.getElementById('panel-' + id).classList.add('active');
+    // Only update buttons in the inverse section
+    const btn = event.currentTarget;
+    btn.closest('.ntab-buttons').querySelectorAll('.ntab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+</script>
+
+</body>
+</html>
