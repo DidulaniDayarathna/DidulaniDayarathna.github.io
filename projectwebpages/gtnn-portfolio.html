@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>GTNN – Generative Tandem Neural Network</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #07090f;
+    --surface: #0e1120;
+    --surface2: #141829;
+    --border: rgba(255,255,255,0.07);
+    --text: #e8eaf0;
+    --muted: #8892a4;
+    --red:  #ff4d6d;
+    --green:#3dffa0;
+    --blue: #4db8ff;
+    --amber:#ffcc44;
+    --glow-r: rgba(255,77,109,0.18);
+    --glow-g: rgba(61,255,160,0.18);
+    --glow-b: rgba(77,184,255,0.18);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Outfit', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none; z-index: 0; opacity: .5;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1rem 3rem;
+    background: rgba(7,9,15,0.85);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-brand { font-family: 'DM Mono', monospace; font-size: .85rem; letter-spacing: .12em; color: var(--muted); }
+  .nav-links { display: flex; gap: 2rem; list-style: none; }
+  .nav-links a { font-size: .82rem; text-decoration: none; color: var(--muted); letter-spacing: .04em; transition: color .2s; }
+  .nav-links a:hover { color: var(--text); }
+
+  .container { max-width: 1100px; margin: 0 auto; padding: 0 2rem; }
+
+  /* HERO */
+  #hero {
+    min-height: 100vh;
+    display: flex; flex-direction: column; justify-content: center;
+    padding: 8rem 2rem 6rem;
+    position: relative; overflow: hidden;
+  }
+  .hero-orb { position: absolute; border-radius: 50%; filter: blur(100px); pointer-events: none; }
+  .orb-r { width: 500px; height: 500px; background: var(--glow-r); top: -100px; left: -100px; }
+  .orb-g { width: 400px; height: 400px; background: var(--glow-g); top: 20%; right: -80px; }
+  .orb-b { width: 600px; height: 600px; background: var(--glow-b); bottom: -200px; left: 30%; }
+  .hero-inner { position: relative; z-index: 1; }
+
+  .hero-tag {
+    display: inline-block;
+    font-family: 'DM Mono', monospace; font-size: .75rem; letter-spacing: .14em;
+    color: var(--blue); border: 1px solid rgba(77,184,255,0.3);
+    background: rgba(77,184,255,0.06); padding: .35rem .9rem; border-radius: 2px;
+    margin-bottom: 1.8rem; animation: fadeUp .6s ease both;
+  }
+  h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(2.4rem, 5vw, 4.2rem);
+    line-height: 1.12; font-weight: 400; max-width: 800px;
+    animation: fadeUp .7s .1s ease both;
+  }
+  h1 em { font-style: italic; color: var(--blue); }
+  .hero-authors {
+    margin-top: 1.4rem; font-size: .9rem; color: var(--muted); letter-spacing: .04em;
+    animation: fadeUp .7s .2s ease both;
+  }
+  .hero-authors span { color: var(--text); }
+
+  .skills-bar { display: flex; flex-wrap: wrap; gap: .6rem; margin-top: 2.4rem; animation: fadeUp .7s .3s ease both; }
+  .skill-tag {
+    font-family: 'DM Mono', monospace; font-size: .72rem;
+    letter-spacing: .08em; padding: .28rem .75rem; border-radius: 2px; border: 1px solid;
+  }
+  .skill-tag.red   { color: var(--red);   border-color: rgba(255,77,109,.3);  background: rgba(255,77,109,.06); }
+  .skill-tag.green { color: var(--green); border-color: rgba(61,255,160,.3);  background: rgba(61,255,160,.06); }
+  .skill-tag.blue  { color: var(--blue);  border-color: rgba(77,184,255,.3);  background: rgba(77,184,255,.06); }
+  .skill-tag.amber { color: var(--amber); border-color: rgba(255,204,68,.3);  background: rgba(255,204,68,.06); }
+
+  .hero-cta { margin-top: 2.8rem; display: flex; gap: 1rem; flex-wrap: wrap; animation: fadeUp .7s .4s ease both; }
+  .btn-primary {
+    display: inline-flex; align-items: center; gap: .5rem; padding: .75rem 1.6rem;
+    background: var(--blue); color: #07090f;
+    font-family: 'DM Mono', monospace; font-size: .82rem; letter-spacing: .06em;
+    text-decoration: none; border-radius: 3px; font-weight: 500;
+    transition: opacity .2s, transform .2s;
+  }
+  .btn-primary:hover { opacity: .85; transform: translateY(-1px); }
+  .btn-secondary {
+    display: inline-flex; align-items: center; gap: .5rem; padding: .75rem 1.6rem;
+    background: transparent; color: var(--text);
+    font-family: 'DM Mono', monospace; font-size: .82rem; letter-spacing: .06em;
+    text-decoration: none; border: 1px solid var(--border); border-radius: 3px;
+    transition: border-color .2s, color .2s;
+  }
+  .btn-secondary:hover { border-color: rgba(255,255,255,.3); color: #fff; }
+
+  /* SECTIONS */
+  section { padding: 6rem 0; border-top: 1px solid var(--border); position: relative; }
+  .section-label {
+    font-family: 'DM Mono', monospace; font-size: .72rem;
+    letter-spacing: .2em; color: var(--muted); text-transform: uppercase; margin-bottom: 1rem;
+  }
+  h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(1.8rem, 3.5vw, 2.6rem);
+    font-weight: 400; line-height: 1.2; margin-bottom: 1.8rem;
+  }
+  h3 { font-size: 1.05rem; font-weight: 600; margin-bottom: .7rem; letter-spacing: .02em; }
+  p { color: #c2c8d4; font-size: .97rem; margin-bottom: 1rem; }
+  p:last-child { margin-bottom: 0; }
+
+  /* CALLOUT */
+  .callout {
+    background: var(--surface); border: 1px solid var(--border);
+    border-left: 3px solid var(--blue);
+    border-radius: 4px; padding: 1.5rem 1.8rem; margin: 2rem 0;
+  }
+  .callout p { font-size: 1.02rem; color: var(--text); margin: 0; }
+
+  /* HIGHLIGHT CARD for the optimization sentence */
+  .highlight-card {
+    background: linear-gradient(135deg, rgba(77,184,255,0.07), rgba(61,255,160,0.04));
+    border: 1px solid rgba(77,184,255,0.25);
+    border-radius: 10px; padding: 2rem 2.2rem; margin: 2rem 0;
+    position: relative; overflow: hidden;
+  }
+  .highlight-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, var(--blue), var(--green));
+  }
+  .highlight-card p {
+    font-size: 1.08rem; color: var(--text); margin: 0; line-height: 1.7;
+  }
+
+  /* ARCHITECTURE DIAGRAM BOX */
+  .arch-diagram {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; padding: 2rem; margin: 2.5rem 0;
+  }
+  .arch-diagram svg { width: 100%; height: auto; display: block; }
+
+  /* CHALLENGE PILLS */
+  .challenge-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem; margin-top: 2rem;
+  }
+  .challenge-pill {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; padding: 1.4rem 1.5rem;
+    display: flex; gap: .9rem; align-items: flex-start;
+    transition: border-color .2s, transform .2s;
+  }
+  .challenge-pill:hover { border-color: rgba(255,255,255,.15); transform: translateY(-2px); }
+  .challenge-num {
+    font-family: 'DM Mono', monospace; font-size: .72rem;
+    color: var(--blue); flex-shrink: 0;
+    background: rgba(77,184,255,0.08); border: 1px solid rgba(77,184,255,0.2);
+    width: 28px; height: 28px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .challenge-pill h3 { font-size: .9rem; color: var(--text); margin: 0; font-weight: 500; line-height: 1.4; }
+
+  /* DOT MATRIX TECHNIQUE COMPARISON */
+  .technique-compare { margin-top: 2.5rem; }
+  .technique-compare-title {
+    font-family: 'DM Mono', monospace; font-size: .72rem;
+    letter-spacing: .15em; color: var(--muted); text-transform: uppercase; margin-bottom: 1.2rem;
+  }
+  .technique-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; }
+  .technique-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; padding: 1.4rem 1.5rem; transition: border-color .2s;
+  }
+  .technique-card.gtnn {
+    border-color: rgba(77,184,255,0.3);
+    background: linear-gradient(135deg, rgba(77,184,255,0.06), rgba(61,255,160,0.03));
+  }
+  .technique-card:hover { border-color: rgba(255,255,255,.15); }
+  .technique-name { font-size: .88rem; font-weight: 600; margin-bottom: 1rem; color: var(--text); }
+  .technique-card.gtnn .technique-name { color: var(--blue); }
+  .dot-row { display: flex; align-items: center; gap: .6rem; margin-bottom: .5rem; }
+  .dot-row:last-child { margin-bottom: 0; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .dot.yes  { background: var(--green); box-shadow: 0 0 6px rgba(61,255,160,0.5); }
+  .dot.no   { background: rgba(255,77,109,0.5); }
+  .dot.part { background: var(--amber); box-shadow: 0 0 6px rgba(255,204,68,0.4); }
+  .dot-label { font-size: .8rem; color: var(--muted); }
+  .dot-legend { display: flex; gap: 1.4rem; margin-top: 1rem; flex-wrap: wrap; }
+  .dot-legend-item { display: flex; align-items: center; gap: .5rem; font-size: .78rem; color: var(--muted); }
+
+  /* INNOVATION CARDS */
+  .innovations-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem; margin-top: 2rem;
+  }
+  .innovation-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 2rem;
+    position: relative; overflow: hidden;
+    transition: border-color .2s, transform .2s;
+  }
+  .innovation-card:hover { border-color: rgba(255,255,255,.15); transform: translateY(-2px); }
+  .innovation-num {
+    font-family: 'DM Serif Display', serif;
+    font-size: 3.5rem; line-height: 1; font-weight: 400;
+    opacity: 0.12; position: absolute; top: 1rem; right: 1.4rem;
+  }
+  .innovation-card.c1 { border-top: 2px solid rgba(77,184,255,0.4); }
+  .innovation-card.c2 { border-top: 2px solid rgba(61,255,160,0.4); }
+  .innovation-card.c3 { border-top: 2px solid rgba(255,204,68,0.4); }
+  .innovation-card.c4 { border-top: 2px solid rgba(255,77,109,0.4); }
+  .innovation-card.c1 .innovation-num { color: var(--blue); }
+  .innovation-card.c2 .innovation-num { color: var(--green); }
+  .innovation-card.c3 .innovation-num { color: var(--amber); }
+  .innovation-card.c4 .innovation-num { color: var(--red); }
+  .innovation-icon { font-size: 1.6rem; margin-bottom: 1rem; display: block; }
+  .innovation-card h3 { font-size: 1rem; font-weight: 600; margin-bottom: .7rem; max-width: 85%; }
+  .innovation-card.c1 h3 { color: var(--blue); }
+  .innovation-card.c2 h3 { color: var(--green); }
+  .innovation-card.c3 h3 { color: var(--amber); }
+  .innovation-card.c4 h3 { color: var(--red); }
+  .innovation-card p { font-size: .88rem; color: var(--muted); line-height: 1.65; }
+
+  /* INTERACTIVE TABS */
+  .method-tabs { margin-top: 2.5rem; }
+  .tab-buttons {
+    display: flex; border-bottom: 1px solid var(--border);
+  }
+  .tab-btn {
+    font-family: 'DM Mono', monospace; font-size: .78rem;
+    letter-spacing: .06em; padding: .9rem 1.6rem;
+    background: transparent; border: none; color: var(--muted);
+    cursor: pointer; position: relative; transition: color .2s;
+  }
+  .tab-btn::after {
+    content: ''; position: absolute; bottom: -1px; left: 0; right: 0; height: 2px;
+    background: transparent; transition: background .2s;
+  }
+  .tab-btn.active { color: var(--text); }
+  .tab-btn.active.tb1::after { background: var(--blue); }
+  .tab-btn.active.tb2::after { background: var(--green); }
+  .tab-btn.active.tb3::after { background: var(--amber); }
+  .tab-btn:hover { color: var(--text); }
+
+  .tab-panel {
+    display: none;
+    background: var(--surface); border: 1px solid var(--border);
+    border-top: none; border-radius: 0 0 8px 8px;
+    padding: 2rem;
+    animation: fadeIn .25s ease;
+  }
+  .tab-panel.active {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;
+  }
+  @media (max-width: 640px) { .tab-panel.active { grid-template-columns: 1fr; } }
+
+  .tab-panel-main h3 { font-size: 1.08rem; margin-bottom: .9rem; }
+  .tab-panel-main.t1 h3 { color: var(--blue); }
+  .tab-panel-main.t2 h3 { color: var(--green); }
+  .tab-panel-main.t3 h3 { color: var(--amber); }
+  .tab-panel-main p { font-size: .9rem; color: var(--muted); line-height: 1.65; margin-bottom: .9rem; }
+
+  .tab-panel-meta { display: flex; flex-direction: column; gap: .8rem; }
+  .meta-chip {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 6px; padding: 1rem 1.2rem;
+  }
+  .meta-chip .meta-label {
+    font-family: 'DM Mono', monospace; font-size: .68rem;
+    letter-spacing: .1em; text-transform: uppercase; margin-bottom: .3rem;
+  }
+  .meta-chip.t1 .meta-label { color: var(--blue); }
+  .meta-chip.t2 .meta-label { color: var(--green); }
+  .meta-chip.t3 .meta-label { color: var(--amber); }
+  .meta-chip .meta-val { font-size: .88rem; color: var(--text); line-height: 1.4; }
+
+  /* RESULTS */
+  .results-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.2rem; margin: 2rem 0;
+  }
+  .result-metric {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 6px; padding: 1.5rem; text-align: center;
+  }
+  .result-metric .val {
+    font-family: 'DM Serif Display', serif; font-size: 2.4rem; line-height: 1; margin-bottom: .4rem;
+  }
+  .result-metric .val.blue { color: var(--blue); }
+  .result-metric .val.amber { color: var(--amber); }
+  .result-metric .val.red { color: var(--red); }
+  .result-metric .desc { font-size: .8rem; color: var(--muted); line-height: 1.4; }
+
+  /* CARDS */
+  .cards { display: grid; gap: 1.2rem; }
+  .cards-2 { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+  .card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 6px; padding: 1.6rem 1.8rem;
+    transition: border-color .2s, transform .2s;
+    position: relative; overflow: hidden;
+  }
+  .card:hover { border-color: rgba(255,255,255,.15); transform: translateY(-2px); }
+  .card-accent { position: absolute; inset: 0; pointer-events: none; opacity: .06; }
+  .card.r .card-accent { background: radial-gradient(circle at 0% 0%, var(--red) 0%, transparent 60%); }
+  .card.g .card-accent { background: radial-gradient(circle at 0% 0%, var(--green) 0%, transparent 60%); }
+  .card.b .card-accent { background: radial-gradient(circle at 0% 0%, var(--blue) 0%, transparent 60%); }
+  .card.a .card-accent { background: radial-gradient(circle at 0% 0%, var(--amber) 0%, transparent 60%); }
+  .card h3 { font-size: .98rem; }
+  .card p { font-size: .88rem; color: var(--muted); }
+
+  /* TAKEAWAY */
+  .takeaway {
+    background: linear-gradient(135deg, rgba(77,184,255,.06), rgba(61,255,160,.04));
+    border: 1px solid rgba(77,184,255,.2);
+    border-radius: 8px; padding: 2.5rem; text-align: center; margin: 2rem 0;
+  }
+  .takeaway h3 {
+    font-family: 'DM Serif Display', serif; font-size: 1.6rem; font-weight: 400;
+    margin-bottom: 1rem; color: var(--text);
+  }
+  .takeaway p { max-width: 720px; margin: 0 auto; color: var(--muted); }
+
+  /* WHAT'S NEXT */
+  .next-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-top: 2rem; }
+  .next-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 2rem;
+    transition: border-color .2s, transform .2s;
+  }
+  .next-card:hover { border-color: rgba(255,255,255,.15); transform: translateY(-2px); }
+  .next-card-num {
+    font-family: 'DM Mono', monospace; font-size: .68rem; letter-spacing: .12em;
+    color: var(--muted); margin-bottom: .8rem; display: block;
+  }
+  .next-card h3 { font-size: 1rem; color: var(--text); margin-bottom: .7rem; font-weight: 600; }
+  .next-card p { font-size: .88rem; color: var(--muted); line-height: 1.6; margin: 0; }
+  .next-card.n1 { border-top: 2px solid rgba(77,184,255,0.4); }
+  .next-card.n2 { border-top: 2px solid rgba(61,255,160,0.4); }
+  .next-card.n3 { border-top: 2px solid rgba(255,204,68,0.4); }
+
+  /* FOOTER */
+  footer { border-top: 1px solid var(--border); padding: 3rem 0; text-align: center; }
+  footer p { font-size: .82rem; color: var(--muted); }
+  footer a { color: var(--blue); text-decoration: none; }
+
+  /* ANIMATIONS */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: none; }
+  }
+
+  @media (max-width: 700px) {
+    nav { padding: 1rem 1.2rem; }
+    .nav-links { display: none; }
+    h1 { font-size: 2rem; }
+    .tab-btn { font-size: .7rem; padding: .7rem .8rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-brand">GTNN / 2025</div>
+  <ul class="nav-links">
+    <li><a href="#overview">Overview</a></li>
+    <li><a href="#challenges">Challenges</a></li>
+    <li><a href="#core-idea">Core Idea</a></li>
+    <li><a href="#method">Method</a></li>
+    <li><a href="#results">Results</a></li>
+    <li><a href="#next">What's Next</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-orb orb-r"></div>
+  <div class="hero-orb orb-g"></div>
+  <div class="hero-orb orb-b"></div>
+  <div class="container hero-inner">
+    <div class="hero-tag">Published · Physica Scripta 100, 046006 (2025)</div>
+    <h1>Generative Tandem Neural Network for Optimization of <em>Nanophotonic Color Splitters</em></h1>
+    <p class="hero-authors">
+      <span>Didulani Acharige</span> &amp; <span>Eric Johlin</span>
+      &nbsp;·&nbsp; Department of Mechanical &amp; Materials Engineering, Western University
+    </p>
+    <div class="skills-bar">
+      <span class="skill-tag blue">Deep Learning</span>
+      <span class="skill-tag blue">Tandem Neural Networks</span>
+      <span class="skill-tag green">Inverse Design</span>
+      <span class="skill-tag green">Nanophotonics</span>
+      <span class="skill-tag amber">Topology Optimization</span>
+      <span class="skill-tag amber">Genetic Algorithm</span>
+      <span class="skill-tag red">Transfer Learning</span>
+      <span class="skill-tag red">Generative AI</span>
+      <span class="skill-tag blue">FDTD Simulation (Meep)</span>
+      <span class="skill-tag green">Color Image Sensors</span>
+    </div>
+    <div class="hero-cta">
+      <a href="https://iopscience.iop.org/article/10.1088/1402-4896/adba19/meta" target="_blank" class="btn-primary">↗ Read the Paper</a>
+      <a href="#overview" class="btn-secondary">Explore Project ↓</a>
+    </div>
+  </div>
+</section>
+
+
+<!-- SECTION 1: OVERVIEW -->
+<section id="overview">
+  <div class="container">
+    <div class="section-label">Background</div>
+    <h2>What is Optimization in the Inverse Design of Nanophotonics?</h2>
+
+    <p>Nanophotonic devices manipulate light at the nanoscale by controlling how electromagnetic waves interact with precisely shaped material structures. The behavior of such devices depends critically on their physical geometry, and this relationship is highly non-linear and unintuitive.</p>
+
+    <p><strong>Forward design</strong> starts with a structure and asks: what does this do to light? This is relatively straightforward to simulate. <strong>Inverse design</strong> flips this entirely: given a desired optical behavior, what structure should we build? This is far harder. It is a high-dimensional search problem where many different structures can produce similar performance, and most of the design space produces poor results.</p>
+
+    <div class="callout">
+      <p>"The algorithmic design of nanophotonic structures promises to significantly improve the efficiency of nanophotonic components due to the strong dependence of electromagnetic function on geometry and the unintuitive connection between structure and response."</p>
+    </div>
+
+    <p>In the context of this work, the target devices are <strong>color splitters</strong>: nanostructures printed directly on top of camera sensor pixels that separate incoming light into red, green, and blue channels and redirect each to spatially distinct detector pixels. Unlike conventional color filter arrays, which absorb roughly two-thirds of incident light, these fully dielectric splitters can theoretically achieve photon transmission efficiencies exceeding 80%, making them highly attractive for next-generation digital imaging.</p>
+
+    <!-- COLOR SPLITTER DIAGRAM -->
+    <div class="arch-diagram">
+      <svg viewBox="0 0 900 220" xmlns="http://www.w3.org/2000/svg" font-family="'DM Mono', monospace">
+        <text x="450" y="24" text-anchor="middle" font-size="11" fill="#8892a4" letter-spacing="2">COLOR SPLITTER VS ABSORPTIVE FILTER</text>
+        <g transform="translate(80,50)">
+          <text x="130" y="0" text-anchor="middle" font-size="10" fill="#8892a4">CONVENTIONAL FILTER ARRAY</text>
+          <text x="130" y="26" text-anchor="middle" font-size="9" fill="#c2c8d4">Incident White Light</text>
+          <line x1="130" y1="30" x2="130" y2="50" stroke="#fff" stroke-width="2" stroke-dasharray="4,3"/>
+          <rect x="50"  y="50" width="60" height="28" rx="2" fill="rgba(255,77,109,0.25)"  stroke="#ff4d6d" stroke-width="1"/>
+          <rect x="120" y="50" width="60" height="28" rx="2" fill="rgba(61,255,160,0.25)"  stroke="#3dffa0" stroke-width="1"/>
+          <rect x="190" y="50" width="60" height="28" rx="2" fill="rgba(77,184,255,0.25)"  stroke="#4db8ff" stroke-width="1"/>
+          <text x="80"  y="69" text-anchor="middle" font-size="9" fill="#ff4d6d">R filter</text>
+          <text x="150" y="69" text-anchor="middle" font-size="9" fill="#3dffa0">G filter</text>
+          <text x="220" y="69" text-anchor="middle" font-size="9" fill="#4db8ff">B filter</text>
+          <text x="130" y="94" text-anchor="middle" font-size="9" fill="#ff4d6d">~67% absorbed</text>
+          <rect x="50"  y="100" width="60" height="32" rx="2" fill="rgba(255,77,109,0.15)" stroke="rgba(255,77,109,0.4)"  stroke-width="1"/>
+          <rect x="120" y="100" width="60" height="32" rx="2" fill="rgba(61,255,160,0.15)"  stroke="rgba(61,255,160,0.4)"  stroke-width="1"/>
+          <rect x="190" y="100" width="60" height="32" rx="2" fill="rgba(77,184,255,0.15)" stroke="rgba(77,184,255,0.4)"  stroke-width="1"/>
+          <text x="80"  y="121" text-anchor="middle" font-size="9" fill="#8892a4">pixel</text>
+          <text x="150" y="121" text-anchor="middle" font-size="9" fill="#8892a4">pixel</text>
+          <text x="220" y="121" text-anchor="middle" font-size="9" fill="#8892a4">pixel</text>
+          <text x="130" y="152" text-anchor="middle" font-size="10" fill="#ff4d6d">Low Efficiency</text>
+          <text x="130" y="166" text-anchor="middle" font-size="9"  fill="#8892a4">Absorptive losses dominate</text>
+        </g>
+        <line x1="450" y1="50" x2="450" y2="200" stroke="rgba(255,255,255,0.07)" stroke-width="1" stroke-dasharray="6,4"/>
+        <g transform="translate(500,50)">
+          <text x="130" y="0" text-anchor="middle" font-size="10" fill="#8892a4">NANOPHOTONIC COLOR SPLITTER</text>
+          <text x="130" y="26" text-anchor="middle" font-size="9" fill="#c2c8d4">Incident White Light</text>
+          <line x1="130" y1="30" x2="130" y2="50" stroke="#fff" stroke-width="2" stroke-dasharray="4,3"/>
+          <rect x="50" y="50" width="160" height="28" rx="2" fill="rgba(77,184,255,0.12)" stroke="rgba(77,184,255,0.4)" stroke-width="1.5"/>
+          <text x="130" y="69" text-anchor="middle" font-size="9" fill="#4db8ff">Dielectric Nanostructure</text>
+          <line x1="80"  y1="78" x2="68"  y2="100" stroke="#ff4d6d" stroke-width="1.5"/>
+          <line x1="130" y1="78" x2="130" y2="100" stroke="#3dffa0" stroke-width="1.5"/>
+          <line x1="180" y1="78" x2="192" y2="100" stroke="#4db8ff" stroke-width="1.5"/>
+          <text x="130" y="94" text-anchor="middle" font-size="9" fill="#3dffa0">&gt;80% transmitted</text>
+          <rect x="38"  y="100" width="50" height="32" rx="2" fill="rgba(255,77,109,0.25)" stroke="#ff4d6d" stroke-width="1"/>
+          <rect x="105" y="100" width="50" height="32" rx="2" fill="rgba(61,255,160,0.25)"  stroke="#3dffa0" stroke-width="1"/>
+          <rect x="172" y="100" width="50" height="32" rx="2" fill="rgba(77,184,255,0.25)" stroke="#4db8ff" stroke-width="1"/>
+          <text x="63"  y="121" text-anchor="middle" font-size="9" fill="#ff4d6d">R</text>
+          <text x="130" y="121" text-anchor="middle" font-size="9" fill="#3dffa0">G</text>
+          <text x="197" y="121" text-anchor="middle" font-size="9" fill="#4db8ff">B</text>
+          <text x="130" y="152" text-anchor="middle" font-size="10" fill="#3dffa0">High Efficiency</text>
+          <text x="130" y="166" text-anchor="middle" font-size="9"  fill="#8892a4">Light redirected, not absorbed</text>
+        </g>
+      </svg>
+    </div>
+
+    <!-- HIGHLIGHTED SENTENCE IN CARD -->
+    <div class="highlight-card">
+      <p>Optimization in this context means algorithmically searching the vast space of possible nanostructure geometries to find those that come closest to a target transmission spectrum. The challenge is that each candidate structure evaluation requires a full electromagnetic simulation, making exhaustive search computationally prohibitive.</p>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- SECTION 2: CHALLENGES -->
+<section id="challenges">
+  <div class="container">
+    <div class="section-label">Problem Space</div>
+    <h2>Challenges of Existing Optimization Techniques</h2>
+    <p>Prior approaches to nanophotonic inverse design each carry significant limitations that constrain their practical usefulness. Understanding these motivates the GTNN approach.</p>
+
+    <div class="challenge-grid">
+      <div class="challenge-pill">
+        <div class="challenge-num">1</div>
+        <h3>Computational Cost of Simulation-Based Optimization</h3>
+      </div>
+      <div class="challenge-pill">
+        <div class="challenge-num">2</div>
+        <h3>Sensitivity to Initial Conditions</h3>
+      </div>
+      <div class="challenge-pill">
+        <div class="challenge-num">3</div>
+        <h3>Single Input, Single Output with Zero Diversity in Standard Tandem Networks</h3>
+      </div>
+      <div class="challenge-pill">
+        <div class="challenge-num">4</div>
+        <h3>Poor Extrapolation in Inverse Networks</h3>
+      </div>
+      <div class="challenge-pill">
+        <div class="challenge-num">5</div>
+        <h3>Data Efficiency Constraints</h3>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- SECTION 3: CORE IDEA -->
+<section id="core-idea">
+  <div class="container">
+    <div class="section-label">Core Idea</div>
+    <h2>The GTNN Approach: Four Key Innovations</h2>
+    <p>The Generative Tandem Neural Network addresses the above challenges through a set of complementary innovations, each solving a distinct limitation of prior approaches.</p>
+
+    <div class="innovations-grid">
+
+      <div class="innovation-card c1">
+        <div class="innovation-num">01</div>
+        <span class="innovation-icon">🔀</span>
+        <h3>Single Input, Multiple Output Tandem Network</h3>
+        <p>A noise vector is injected alongside the target transmission spectrum into the inverse network. This transforms the traditional single-output tandem architecture into a generative model capable of producing many diverse structural candidates for the same spectral target. Each pass through the network yields a different valid solution. As far as the authors are aware, this approach had not been previously proposed for tandem networks.</p>
+      </div>
+
+      <div class="innovation-card c2">
+        <div class="innovation-num">02</div>
+        <span class="innovation-icon">🎲</span>
+        <h3>Addressing the Non-Uniqueness Problem</h3>
+        <p>In nanophotonic inverse design, many different physical geometries can produce nearly identical optical responses. By using a stochastic noise input, and with the help of pre-trained forward network the GTNN acknowledges and exploits this many-to-one mapping. Each sample from the network represents a plausible solution in this degenerate solution space, effectively making the network competitive with generative approaches like cGANs and VAEs for this task.</p>
+      </div>
+
+      <div class="innovation-card c3">
+        <div class="innovation-num">03</div>
+        <span class="innovation-icon">🧬</span>
+        <h3>Extrapolation via Genetic Algorithm</h3>
+        <p>The inverse network alone performs well within the training distribution but struggles with out-of-distribution target specifications. To overcome this, a genetic algorithm is applied to the input space of the inverse network. The GA evolves noise vectors toward inputs that, when passed through the frozen inverse and forward networks, yield the highest predicted performance, enabling genuine optimization beyond the training data.</p>
+      </div>
+
+      <div class="innovation-card c4">
+        <div class="innovation-num">04</div>
+        <span class="innovation-icon">🔁</span>
+        <h3>Hybrid Model with Iterative Transfer Learning</h3>
+        <p>Rather than requiring a large simulation dataset, the GTNN first trains on a broad, lower-fidelity dataset to learn the general structure-performance relationship, then refines using a small set of just 128 high-quality samples generated through adjoint topology optimization. This iterative transfer learning strategy dramatically reduces simulation cost while maintaining accuracy.</p>
+      </div>
+
+    </div>
+
+    <div class="callout" style="margin-top: 2.5rem;">
+      <p>Together, these four ideas constitute a hybrid methodology that combines the speed of neural network inference, the diversity of generative modeling, and the optimization power of evolutionary algorithms in a framework trainable on a very small labeled dataset.</p>
+    </div>
+  </div>
+</section>
+
+
+<!-- SECTION 4: HOW GTNN WORKS -->
+<section id="method">
+  <div class="container">
+    <div class="section-label">Methodology</div>
+    <h2>How GTNN Works</h2>
+    <p>The GTNN framework consists of three interconnected components that are designed and trained together to perform generative inverse design and optimization.</p>
+
+    <!-- ARCHITECTURE DIAGRAM -->
+    <div class="arch-diagram">
+      <svg viewBox="0 0 960 320" xmlns="http://www.w3.org/2000/svg" font-family="'Outfit', sans-serif">
+        <defs>
+          <marker id="arr"   markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#4db8ff"/></marker>
+          <marker id="arr-g" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#3dffa0"/></marker>
+          <marker id="arr-a" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#ffcc44"/></marker>
+        </defs>
+
+        <!-- Forward network zone -->
+        <rect x="30"  y="20" width="260" height="280" rx="8" fill="rgba(77,184,255,0.04)"  stroke="rgba(77,184,255,0.15)"  stroke-width="1"/>
+        <text x="160" y="42" text-anchor="middle" font-size="10" fill="#4db8ff" letter-spacing="2">FORWARD NETWORK</text>
+
+        <!-- Inverse network zone -->
+        <rect x="340" y="20" width="260" height="280" rx="8" fill="rgba(61,255,160,0.04)"  stroke="rgba(61,255,160,0.15)"  stroke-width="1"/>
+        <text x="470" y="42" text-anchor="middle" font-size="10" fill="#3dffa0" letter-spacing="2">INVERSE NETWORK</text>
+
+        <!-- GA zone -->
+        <rect x="650" y="20" width="280" height="280" rx="8" fill="rgba(255,204,68,0.04)"  stroke="rgba(255,204,68,0.15)"  stroke-width="1"/>
+        <text x="790" y="42" text-anchor="middle" font-size="10" fill="#ffcc44" letter-spacing="2">GENETIC ALGORITHM</text>
+
+        <!-- Forward net nodes -->
+        <rect x="60"  y="70" width="90" height="40" rx="4" fill="rgba(77,184,255,0.15)" stroke="rgba(77,184,255,0.5)" stroke-width="1"/>
+        <text x="105" y="88"  text-anchor="middle" font-size="9" fill="#4db8ff">Structure</text>
+        <text x="105" y="101" text-anchor="middle" font-size="9" fill="#4db8ff">Geometry</text>
+
+        <rect x="60"  y="148" width="200" height="44" rx="4" fill="rgba(77,184,255,0.12)" stroke="rgba(77,184,255,0.4)" stroke-width="1.5"/>
+        <text x="160" y="172" text-anchor="middle" font-size="10" fill="#e8eaf0">CNN (ResNet50)</text>
+
+        <rect x="100" y="234" width="120" height="40" rx="4" fill="rgba(77,184,255,0.15)" stroke="rgba(77,184,255,0.5)" stroke-width="1"/>
+        <text x="160" y="252" text-anchor="middle" font-size="9" fill="#4db8ff">Transmission</text>
+        <text x="160" y="265" text-anchor="middle" font-size="9" fill="#4db8ff">Spectra (R,G,B)</text>
+
+        <line x1="105" y1="110" x2="130" y2="148" stroke="#4db8ff" stroke-width="1.2" marker-end="url(#arr)"/>
+        <line x1="160" y1="192" x2="160" y2="234" stroke="#4db8ff" stroke-width="1.2" marker-end="url(#arr)"/>
+
+        <!-- Inverse net nodes -->
+        <rect x="358" y="70"  width="100" height="40" rx="4" fill="rgba(61,255,160,0.12)" stroke="rgba(61,255,160,0.4)" stroke-width="1"/>
+        <text x="408" y="88"  text-anchor="middle" font-size="9" fill="#3dffa0">Target</text>
+        <text x="408" y="101" text-anchor="middle" font-size="9" fill="#3dffa0">Spectrum</text>
+
+        <rect x="472" y="70"  width="100" height="40" rx="4" fill="rgba(61,255,160,0.08)" stroke="rgba(61,255,160,0.3)" stroke-width="1" stroke-dasharray="4,3"/>
+        <text x="522" y="88"  text-anchor="middle" font-size="9" fill="#3dffa0">Noise</text>
+        <text x="522" y="101" text-anchor="middle" font-size="9" fill="#3dffa0">Vector z</text>
+
+        <rect x="358" y="148" width="214" height="44" rx="4" fill="rgba(61,255,160,0.12)" stroke="rgba(61,255,160,0.4)" stroke-width="1.5"/>
+        <text x="465" y="165" text-anchor="middle" font-size="9"  fill="#e8eaf0">Convolutional Neural Network</text>
+        <text x="465" y="181" text-anchor="middle" font-size="9"  fill="#3dffa0">+ Forward Network</text>
+
+        <rect x="390" y="234" width="150" height="40" rx="4" fill="rgba(61,255,160,0.12)" stroke="rgba(61,255,160,0.4)" stroke-width="1"/>
+        <text x="465" y="252" text-anchor="middle" font-size="9" fill="#3dffa0">Generated</text>
+        <text x="465" y="265" text-anchor="middle" font-size="9" fill="#3dffa0">Structure Geometry</text>
+
+        <line x1="408" y1="110" x2="420" y2="148" stroke="#3dffa0" stroke-width="1.2" marker-end="url(#arr-g)"/>
+        <line x1="522" y1="110" x2="510" y2="148" stroke="#3dffa0" stroke-width="1.2" marker-end="url(#arr-g)"/>
+        <line x1="465" y1="192" x2="465" y2="234" stroke="#3dffa0" stroke-width="1.2" marker-end="url(#arr-g)"/>
+
+        <!-- GA nodes -->
+        <rect x="670" y="70"  width="240" height="40" rx="4" fill="rgba(255,204,68,0.12)" stroke="rgba(255,204,68,0.4)" stroke-width="1"/>
+        <text x="790" y="88"  text-anchor="middle" font-size="9" fill="#ffcc44">Population of Noise Vectors</text>
+        <text x="790" y="101" text-anchor="middle" font-size="9" fill="#ffcc44">Initialized Randomly</text>
+
+        <rect x="670" y="148" width="240" height="44" rx="4" fill="rgba(255,204,68,0.12)" stroke="rgba(255,204,68,0.4)" stroke-width="1.5"/>
+        <text x="790" y="165" text-anchor="middle" font-size="10" fill="#e8eaf0">Select · Mutate · Crossover</text>
+        <text x="790" y="181" text-anchor="middle" font-size="9"  fill="#8892a4">Fitness = FOM (Selectivity and Sensitivity)</text>
+
+        <rect x="690" y="234" width="200" height="40" rx="4" fill="rgba(255,204,68,0.12)" stroke="rgba(255,204,68,0.4)" stroke-width="1"/>
+        <text x="790" y="249" text-anchor="middle" font-size="9" fill="#ffcc44">Input matrix to generate</text>
+        <text x="790" y="264" text-anchor="middle" font-size="9" fill="#ffcc44">extrapolative structures</text>
+
+        <line x1="790" y1="110" x2="790" y2="148" stroke="#ffcc44" stroke-width="1.2" marker-end="url(#arr-a)"/>
+        <line x1="790" y1="192" x2="790" y2="234" stroke="#ffcc44" stroke-width="1.2" marker-end="url(#arr-a)"/>
+
+        <!-- Tandem feedback arrow -->
+        <path d="M 465 280 Q 465 300 310 300 Q 160 300 160 280" stroke="rgba(255,255,255,0.2)" stroke-width="1" fill="none" stroke-dasharray="4,3"/>
+        <text x="310" y="315" text-anchor="middle" font-size="8" fill="#8892a4">Tandem: frozen forward guides inverse training</text>
+
+        <!-- GA to inverse arrow -->
+        <line x1="670" y1="254" x2="605" y2="254" stroke="#ffcc44" stroke-width="1.2" marker-end="url(#arr-a)" stroke-dasharray="4,3"/>
+        <text x="638" y="245" text-anchor="middle" font-size="8" fill="#8892a4">input matrix</text>
+      </svg>
+    </div>
+
+    <!-- INTERACTIVE TABS -->
+    <div class="method-tabs">
+      <div class="tab-buttons">
+        <button class="tab-btn tb1 active" onclick="showTab(event,'t1')">01 · Forward Network</button>
+        <button class="tab-btn tb2"         onclick="showTab(event,'t2')">02 · Inverse Network</button>
+        <button class="tab-btn tb3"         onclick="showTab(event,'t3')">03 · Genetic Algorithm</button>
+      </div>
+
+      <!-- TAB 1: Forward Network -->
+      <div id="panel-t1" class="tab-panel active">
+        <div class="tab-panel-main t1">
+          <h3>Forward Network — Predicting Optical Performance</h3>
+          <p>The forward network takes a 2D binary nanostructure geometry as input and predicts its transmission spectrum across the red, green, and blue color channels. It is implemented as a CNN (ResNet50), designed to capture the spatial hierarchies of the device structure.</p>
+          <p>The network first trained on a very small dataset with 128 high quality adjoint optimized samples and afterward iteratively trained the network using new structures generated from the initial inverse network trained on the similar dataset. Once trained, it serves as a fast surrogate for full electromagnetic simulation. It performs well in both interpolation (within the training distribution) and extrapolation (beyond it), and acts as the fitness evaluator inside the genetic algorithm stage.</p>
+        </div>
+        <div class="tab-panel-meta">
+          <div class="meta-chip t1">
+            <div class="meta-label">Architecture</div>
+            <div class="meta-val">CNN (ResNet50)</div>
+          </div>
+          <div class="meta-chip t1">
+            <div class="meta-label">Input</div>
+            <div class="meta-val">2D binary nanostructure geometry</div>
+          </div>
+          <div class="meta-chip t1">
+            <div class="meta-label">Output</div>
+            <div class="meta-val">Transmission spectra (R, G, B channels)</div>
+          </div>
+          <div class="meta-chip t1">
+            <div class="meta-label">Training strategy</div>
+            <div class="meta-val">Transfer learning on 128 adjoint-optimized samples</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 2: Inverse Network -->
+      <div id="panel-t2" class="tab-panel">
+        <div class="tab-panel-main t2">
+          <h3>Inverse Network — Generating Candidate Structures</h3>
+          <p>The inverse network receives a target transmission spectrum and a random noise vector as inputs, producing a candidate structural geometry as output. It is built on a Convolutional Neural Network combined with the Forward Network within the tandem training framework.</p>
+          <p>During training, the output of the inverse network is fed through the frozen forward network, and the loss is computed on the predicted spectrum versus the target and binary cross entropy loss for the generated and existing structures. The noise vector is the key innovation: by sampling different noise vectors for the same target spectrum, the network produces structurally distinct yet high-performing designs, removing the major limitation of tandem networks.</p>
+        </div>
+        <div class="tab-panel-meta">
+          <div class="meta-chip t2">
+            <div class="meta-label">Architecture</div>
+            <div class="meta-val">Convolutional Neural Network + Forward Network</div>
+          </div>
+          <div class="meta-chip t2">
+            <div class="meta-label">Input</div>
+            <div class="meta-val">Target spectrum + noise vector z</div>
+          </div>
+          <div class="meta-chip t2">
+            <div class="meta-label">Output</div>
+            <div class="meta-val">Diverse candidate structural geometries</div>
+          </div>
+          <div class="meta-chip t2">
+            <div class="meta-label">Key innovation</div>
+            <div class="meta-val">SIMO: multiple valid structures per target spectrum</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 3: Genetic Algorithm -->
+      <div id="panel-t3" class="tab-panel">
+        <div class="tab-panel-main t3">
+          <h3>Genetic Algorithm — Optimization and Extrapolation</h3>
+          <p>While the inverse network excels at interpolation within the training distribution, it struggles when the desired performance lies outside what the training data covers. A genetic algorithm is therefore applied to optimize the input vector to the inverse network.</p>
+          <p>A population of noise vectors is initialized randomly. Each is passed through the inverse and forward networks to obtain a predicted performance score using a figure of merit (FOM) based on selectivity and sensitivity. The GA then applies selection, crossover, and mutation to evolve the population. Because it navigates the learned input space rather than raw structure space, the search is far more efficient and enables designs that go beyond the training set.</p>
+        </div>
+        <div class="tab-panel-meta">
+          <div class="meta-chip t3">
+            <div class="meta-label">Method</div>
+            <div class="meta-val">Genetic Algorithm on latent input space</div>
+          </div>
+          <div class="meta-chip t3">
+            <div class="meta-label">Fitness function</div>
+            <div class="meta-val">FOM: Selectivity and Sensitivity</div>
+          </div>
+          <div class="meta-chip t3">
+            <div class="meta-label">GA operations</div>
+            <div class="meta-val">Selection, Mutation, Crossover</div>
+          </div>
+          <div class="meta-chip t3">
+            <div class="meta-label">Output</div>
+            <div class="meta-val">Input matrix to generate extrapolative structures</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- SECTION 5: RESULTS -->
+<section id="results">
+  <div class="container">
+    <div class="section-label">Results</div>
+    <h2>Performance &amp; Key Findings</h2>
+    <p>The GTNN was evaluated on the task of designing 2D dielectric color splitter structures compatible with 800 nm sensor pixels, targeting specific red, green, and blue transmission spectra.</p>
+
+    <div class="results-grid">
+      <div class="result-metric">
+        <div class="val blue">128</div>
+        <div class="desc">High-quality adjoint-optimized training samples, a remarkably small labeled dataset sufficient for the full model</div>
+      </div>
+      <div class="result-metric">
+        <div class="val amber">SIMO</div>
+        <div class="desc">Single Input, Multiple Output: diverse structural candidates generated per target spectrum by varying the noise vector</div>
+      </div>
+      <div class="result-metric">
+        <div class="val red">GA+</div>
+        <div class="desc">Genetic Algorithm overcomes the inverse network's extrapolation limitation, achieving performance beyond the training set</div>
+      </div>
+    </div>
+
+    <div class="cards cards-2" style="margin-top: 2rem;">
+      <div class="card b">
+        <div class="card-accent"></div>
+        <h3>Forward Network Accuracy</h3>
+        <p>The forward network demonstrated strong performance in both interpolation (predictions on designs similar to training data) and extrapolation (predictions on designs outside the training distribution). Its accuracy as a surrogate model is essential since it serves inside the fitness function in the genetic algorithm, and inaccurate forward predictions would mislead the search entirely.</p>
+      </div>
+      <div class="card g">
+        <div class="card-accent"></div>
+        <h3>Inverse Network — Interpolation</h3>
+        <p>For target spectra within the training distribution, the inverse network successfully generated valid and high-performing structural geometries. The noise vector input allowed exploration of the non-unique solution space, producing a range of structurally distinct designs that all approached the target performance.</p>
+      </div>
+      <div class="card a">
+        <div class="card-accent"></div>
+        <h3>Inverse Network — Extrapolation and GA Fix</h3>
+        <p>When tasked with target spectra significantly outside the training distribution, the inverse network alone showed degraded performance. Applying the genetic algorithm to obtain the input matrix that can produce extrapolative structures, successfully recovered high-quality results, producing structures with performance competitive with or exceeding those in the training set.</p>
+      </div>
+      <div class="card r">
+        <div class="card-accent"></div>
+        <h3>Outperforming Topology Optimization</h3>
+        <p>The full GTNN pipeline achieved significant improvement in nanophotonic structure performance compared to traditional gradient-based topology optimization, even though the training data was itself generated using that same optimizer. This demonstrates the framework's ability to synthesize and surpass its own training baseline.</p>
+      </div>
+    </div>
+
+    <!-- WORKFLOW SUMMARY -->
+    <div class="arch-diagram" style="margin-top: 2.5rem;">
+      <svg viewBox="0 0 960 200" xmlns="http://www.w3.org/2000/svg" font-family="'Outfit', sans-serif">
+        <defs>
+          <marker id="arr3" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L8,3 z" fill="#8892a4"/>
+          </marker>
+        </defs>
+        <text x="480" y="26" text-anchor="middle" font-size="14" fill="#8892a4" letter-spacing="2">GTNN WORKFLOW SUMMARY</text>
+
+        <rect x="20"  y="44" width="170" height="72" rx="4" fill="rgba(77,184,255,0.1)"  stroke="rgba(77,184,255,0.3)"  stroke-width="1"/>
+        <text x="105" y="70" text-anchor="middle" font-size="13" fill="#4db8ff">Phase 1</text>
+        <text x="105" y="88" text-anchor="middle" font-size="11" fill="#c2c8d4">Train on broad</text>
+        <text x="105" y="104" text-anchor="middle" font-size="11" fill="#c2c8d4">low-fi dataset</text>
+        <line x1="190" y1="80" x2="212" y2="80" stroke="#8892a4" stroke-width="1.2" marker-end="url(#arr3)"/>
+
+        <rect x="212" y="44" width="170" height="72" rx="4" fill="rgba(61,255,160,0.1)"  stroke="rgba(61,255,160,0.3)"  stroke-width="1"/>
+        <text x="297" y="70" text-anchor="middle" font-size="13" fill="#3dffa0">Phase 2</text>
+        <text x="297" y="88" text-anchor="middle" font-size="11" fill="#c2c8d4">Transfer learn on</text>
+        <text x="297" y="104" text-anchor="middle" font-size="11" fill="#c2c8d4">128 adjoint samples</text>
+        <line x1="382" y1="80" x2="404" y2="80" stroke="#8892a4" stroke-width="1.2" marker-end="url(#arr3)"/>
+
+        <rect x="404" y="44" width="170" height="72" rx="4" fill="rgba(255,204,68,0.1)"  stroke="rgba(255,204,68,0.3)"  stroke-width="1"/>
+        <text x="489" y="70" text-anchor="middle" font-size="13" fill="#ffcc44">Phase 3</text>
+        <text x="489" y="88" text-anchor="middle" font-size="11" fill="#c2c8d4">SIMO Tandem</text>
+        <text x="489" y="104" text-anchor="middle" font-size="11" fill="#c2c8d4">Inverse Design</text>
+        <line x1="574" y1="80" x2="596" y2="80" stroke="#8892a4" stroke-width="1.2" marker-end="url(#arr3)"/>
+
+        <rect x="596" y="44" width="170" height="72" rx="4" fill="rgba(255,77,109,0.1)"  stroke="rgba(255,77,109,0.3)"  stroke-width="1"/>
+        <text x="681" y="70" text-anchor="middle" font-size="13" fill="#ff4d6d">Phase 4</text>
+        <text x="681" y="88" text-anchor="middle" font-size="11" fill="#c2c8d4">GA Extrapolation</text>
+        <text x="681" y="104" text-anchor="middle" font-size="11" fill="#c2c8d4">Optimization</text>
+        <line x1="766" y1="80" x2="788" y2="80" stroke="#8892a4" stroke-width="1.2" marker-end="url(#arr3)"/>
+
+        <rect x="788" y="44" width="152" height="72" rx="4" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+        <text x="864" y="70"  text-anchor="middle" font-size="13" fill="#e8eaf0">Optimized</text>
+        <text x="864" y="88"  text-anchor="middle" font-size="11" fill="#e8eaf0">Color Splitter</text>
+        <text x="864" y="104" text-anchor="middle" font-size="11" fill="#3dffa0">High Efficiency</text>
+
+        <text x="105" y="134" text-anchor="middle" font-size="10" fill="#8892a4">FDTD simulations</text>
+        <text x="297" y="134" text-anchor="middle" font-size="10" fill="#8892a4">Topology-optimized</text>
+        <text x="489" y="134" text-anchor="middle" font-size="10" fill="#8892a4">Noise vector injection</text>
+        <text x="681" y="134" text-anchor="middle" font-size="10" fill="#8892a4">Beyond training set</text>
+        <text x="864" y="134" text-anchor="middle" font-size="10" fill="#8892a4">Best performance</text>
+      </svg>
+    </div>
+  </div>
+</section>
+
+
+<!-- SECTION 6: KEY TAKEAWAY -->
+<section id="takeaway">
+  <div class="container">
+    <div class="takeaway">
+      <h3>Key Takeaway</h3>
+      <p>The GTNN represents a significant advance in neural-network-based inverse design of nanophotonic devices. By combining a generative single-input multiple-output tandem architecture with iterative transfer learning and genetic algorithm optimization, the framework overcomes the three core limitations of prior approaches: lack of output diversity, poor extrapolation, and high data requirements, all within a single unified pipeline. The method not only achieves high-quality interpolative design but also enables genuine optimization beyond the training set, outperforming the simulation-based optimizer that generated its own training data.</p>
+    </div>
+
+    <p>This hybrid methodology represents an important shift: rather than treating neural networks as simple function approximators for inverse design, GTNN positions the trained network as the foundation for a generative optimization engine. The forward network becomes a fast, learned simulator; the inverse network becomes a constrained generator; and the genetic algorithm becomes a guided explorer of the learned design space.</p>
+  </div>
+</section>
+
+
+<!-- SECTION 7: WHAT'S NEXT -->
+<section id="next">
+  <div class="container">
+    <div class="section-label">Future Directions</div>
+    <h2>What's Next</h2>
+    <p>This work opens several promising directions for future research and real-world application.</p>
+
+    <div class="next-cards">
+
+      <div class="next-card n1">
+        <span class="next-card-num">DIRECTION 01</span>
+        <h3>Extension to 3D Nanophotonic Structures</h3>
+        <p>The GTNN framework can be extended to multi-dimensional nanophotonic color splitter structures.</p>
+      </div>
+
+      <div class="next-card n2">
+        <span class="next-card-num">DIRECTION 02</span>
+        <h3>Broader Nanophotonic Applications</h3>
+        <p>The generality of the approach can be validated by applying it to other inverse design problems beyond color splitters, including broadband lenses, metasurfaces, and wavelength-division multiplexers. Each represents a distinct design challenge that would test the robustness and flexibility of the full GTNN pipeline.</p>
+      </div>
+
+      <div class="next-card n3">
+        <span class="next-card-num">DIRECTION 03</span>
+        <h3>Integration with Fabrication Constraints</h3>
+        <p>Future work can incorporate fabrication constraints directly into the optimization process to ensure that generated structures are not only optically optimal but also manufacturable with existing lithographic processes. This is the key step toward real-world deployment in next-generation imaging sensors.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- FOOTER -->
+<footer>
+  <div class="container">
+    <p style="margin-bottom: .6rem;">
+      <strong>Didulani Acharige</strong> &amp; Eric Johlin &mdash; Western University, Department of Mechanical &amp; Materials Engineering
+    </p>
+    <p>
+      Published in <em>Physica Scripta</em>, Vol. 100, 046006 (April 2025) &nbsp;·&nbsp;
+      DOI: <a href="https://iopscience.iop.org/article/10.1088/1402-4896/adba19/meta" target="_blank">10.1088/1402-4896/adba19</a>
+    </p>
+  </div>
+</footer>
+
+<script>
+  function showTab(event, id) {
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('panel-' + id).classList.add('active');
+    event.currentTarget.classList.add('active');
+  }
+</script>
+
+</body>
+</html>
