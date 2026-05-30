@@ -1,0 +1,1966 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Combinatorial Optical Property Measuring System — Thesis</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=IBM+Plex+Mono:wght@300;400;500&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-0: #06090f;
+    --bg-1: #0c1018;
+    --bg-2: #111827;
+    --bg-3: #1a2332;
+    --surface: #1e2a3a;
+    --surface-2: #243040;
+    --border: rgba(0,210,200,0.12);
+    --border-bright: rgba(0,210,200,0.35);
+    --cyan: #00d2c8;
+    --cyan-dim: rgba(0,210,200,0.15);
+    --amber: #f59e0b;
+    --amber-dim: rgba(245,158,11,0.12);
+    --red: #ef4444;
+    --green: #10b981;
+    --text: #dde6f0;
+    --text-dim: #7a92a8;
+    --text-muted: #4a6278;
+    --heading: #eaf4ff;
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'Syne', sans-serif;
+    --serif: 'Lora', Georgia, serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg-0);
+    color: var(--text);
+    font-family: var(--serif);
+    font-size: 17px;
+    line-height: 1.75;
+    overflow-x: hidden;
+  }
+
+  /* ── GLOBAL TEXTURE ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      radial-gradient(ellipse 80% 50% at 50% -10%, rgba(0,210,200,0.06) 0%, transparent 60%),
+      repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(0,210,200,0.025) 40px),
+      repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(0,210,200,0.025) 40px);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── NAVIGATION ── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    background: rgba(6,9,15,0.88);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+  }
+  nav .nav-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 56px;
+  }
+  nav .nav-brand {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    color: var(--cyan);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+  nav .nav-links {
+    display: flex;
+    gap: 1.6rem;
+    list-style: none;
+  }
+  nav .nav-links a {
+    font-family: var(--sans);
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  nav .nav-links a:hover { color: var(--cyan); }
+
+  /* ── HERO ── */
+  .hero {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 10rem 2rem 6rem;
+    overflow: hidden;
+  }
+  .hero-orbs {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+  }
+  .orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.22;
+  }
+  .orb-1 { width: 600px; height: 600px; background: radial-gradient(circle, #00d2c8, transparent 70%); top: -100px; right: -200px; animation: drift 12s ease-in-out infinite alternate; }
+  .orb-2 { width: 400px; height: 400px; background: radial-gradient(circle, #f59e0b, transparent 70%); bottom: 0; left: -100px; animation: drift 15s ease-in-out infinite alternate-reverse; }
+  .orb-3 { width: 300px; height: 300px; background: radial-gradient(circle, #3b82f6, transparent 70%); top: 40%; left: 40%; animation: drift 10s ease-in-out infinite alternate; }
+
+  @keyframes drift { from { transform: translate(0,0) scale(1); } to { transform: translate(20px, -30px) scale(1.05); } }
+
+  .hero-inner {
+    position: relative;
+    max-width: 900px;
+    margin: 0 auto;
+    width: 100%;
+  }
+  .hero-tag {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--cyan);
+    margin-bottom: 1.8rem;
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+  }
+  .hero-tag::before {
+    content: '';
+    display: inline-block;
+    width: 32px;
+    height: 1px;
+    background: var(--cyan);
+  }
+  h1.hero-title {
+    font-family: var(--sans);
+    font-size: clamp(2rem, 5vw, 3.8rem);
+    font-weight: 800;
+    line-height: 1.12;
+    color: var(--heading);
+    letter-spacing: -0.02em;
+    margin-bottom: 2rem;
+    max-width: 820px;
+  }
+  h1.hero-title em {
+    font-style: normal;
+    color: var(--cyan);
+  }
+  .hero-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem 2rem;
+    margin-bottom: 3rem;
+  }
+  .meta-item {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    color: var(--text-dim);
+    display: flex;
+    gap: 0.5rem;
+  }
+  .meta-item span:first-child {
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .hero-abstract {
+    background: rgba(0,210,200,0.04);
+    border-left: 2px solid var(--cyan);
+    border-radius: 0 8px 8px 0;
+    padding: 1.5rem 2rem;
+    font-size: 0.95rem;
+    line-height: 1.85;
+    color: var(--text);
+    max-width: 780px;
+    margin-bottom: 3rem;
+  }
+  .hero-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+  }
+  .badge {
+    font-family: var(--mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 0.35rem 0.8rem;
+    border-radius: 4px;
+    background: var(--cyan-dim);
+    color: var(--cyan);
+    border: 1px solid var(--border-bright);
+  }
+  .badge.amber {
+    background: var(--amber-dim);
+    color: var(--amber);
+    border-color: rgba(245,158,11,0.3);
+  }
+
+  /* ── SCROLL INDICATOR ── */
+  .scroll-hint {
+    position: absolute;
+    bottom: 3rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--text-muted);
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+  .scroll-hint .arrow {
+    width: 1px;
+    height: 40px;
+    background: linear-gradient(to bottom, transparent, var(--cyan));
+    animation: pulse-line 2s ease-in-out infinite;
+  }
+  @keyframes pulse-line { 0%,100% { opacity: 0.3; } 50% { opacity: 1; } }
+
+  /* ── LAYOUT ── */
+  main { position: relative; z-index: 1; }
+  .section {
+    padding: 6rem 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  .section-divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 0 2rem;
+  }
+
+  /* ── SECTION HEADERS ── */
+  .section-header {
+    margin-bottom: 3rem;
+  }
+  .section-num {
+    font-family: var(--mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--cyan);
+    margin-bottom: 0.6rem;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+  .section-num::after {
+    content: '';
+    flex: 0 0 48px;
+    height: 1px;
+    background: var(--border-bright);
+  }
+  h2.section-title {
+    font-family: var(--sans);
+    font-size: clamp(1.7rem, 3vw, 2.6rem);
+    font-weight: 700;
+    color: var(--heading);
+    letter-spacing: -0.02em;
+    line-height: 1.18;
+  }
+  .section-lead {
+    margin-top: 1rem;
+    font-size: 1rem;
+    color: var(--text-dim);
+    max-width: 680px;
+  }
+
+  /* ── CARDS ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.8rem;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+  .card:hover {
+    border-color: var(--border-bright);
+    transform: translateY(-2px);
+  }
+  .card-title {
+    font-family: var(--sans);
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--heading);
+    margin-bottom: 0.7rem;
+    letter-spacing: 0.02em;
+  }
+  .card-body {
+    font-size: 0.88rem;
+    color: var(--text-dim);
+    line-height: 1.75;
+  }
+  .card-icon {
+    font-size: 1.6rem;
+    margin-bottom: 1rem;
+  }
+
+  /* ── GRID LAYOUTS ── */
+  .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.2rem; }
+  .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.2rem; }
+  .grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; }
+
+  /* ── INSTRUMENT SECTION ── */
+  .instrument-diagram {
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 2.5rem;
+    margin: 2rem 0;
+    position: relative;
+    overflow: hidden;
+  }
+  .instrument-diagram::before {
+    content: 'OPTICAL SYSTEM CROSS-SECTION';
+    position: absolute;
+    top: 1rem; right: 1.5rem;
+    font-family: var(--mono);
+    font-size: 0.55rem;
+    letter-spacing: 0.2em;
+    color: var(--text-muted);
+  }
+  .led-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    margin-top: 1.5rem;
+  }
+  .led-table th {
+    background: var(--bg-3);
+    color: var(--cyan);
+    font-weight: 500;
+    padding: 0.65rem 1rem;
+    text-align: left;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    font-size: 0.65rem;
+    border-bottom: 1px solid var(--border-bright);
+  }
+  .led-table td {
+    padding: 0.6rem 1rem;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-dim);
+    vertical-align: middle;
+  }
+  .led-table tr:hover td { background: var(--cyan-dim); }
+  .wave-bar {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .wave-dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+  }
+
+  /* ── PROCESS STEPS ── */
+  .process-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    position: relative;
+  }
+  .process-list::before {
+    content: '';
+    position: absolute;
+    left: 22px;
+    top: 24px;
+    bottom: 24px;
+    width: 1px;
+    background: linear-gradient(to bottom, var(--cyan), transparent);
+    opacity: 0.3;
+  }
+  .process-step {
+    display: grid;
+    grid-template-columns: 48px 1fr;
+    gap: 1.5rem;
+    padding: 1.5rem 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .process-step:last-child { border-bottom: none; }
+  .step-num {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--bg-3);
+    border: 1px solid var(--border-bright);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    color: var(--cyan);
+    flex-shrink: 0;
+  }
+  .step-content h4 {
+    font-family: var(--sans);
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--heading);
+    margin-bottom: 0.4rem;
+  }
+  .step-content p {
+    font-size: 0.87rem;
+    color: var(--text-dim);
+    line-height: 1.7;
+  }
+  .step-tag {
+    font-family: var(--mono);
+    font-size: 0.58rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 3px;
+    background: var(--amber-dim);
+    color: var(--amber);
+    border: 1px solid rgba(245,158,11,0.25);
+    display: inline-block;
+    margin-top: 0.5rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  /* ── SAMPLE SECTION ── */
+  .sample-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+  .sample-card:hover {
+    border-color: var(--border-bright);
+    transform: translateY(-3px);
+  }
+  .sample-header {
+    padding: 1.2rem 1.5rem 0.8rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+  }
+  .sample-color-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .sample-name {
+    font-family: var(--sans);
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--heading);
+  }
+  .sample-formula {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    margin-top: 0.1rem;
+  }
+  .sample-body {
+    padding: 1.2rem 1.5rem;
+  }
+  .sample-meta-row {
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    padding: 0.35rem 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .sample-meta-row:last-child { border-bottom: none; }
+  .sample-meta-row .label { color: var(--text-muted); }
+  .sample-meta-row .value { color: var(--text-dim); }
+  .sample-type-badge {
+    font-family: var(--mono);
+    font-size: 0.58rem;
+    padding: 0.15rem 0.5rem;
+    border-radius: 3px;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+  }
+  .non-scattering { background: rgba(59,130,246,0.12); color: #60a5fa; border: 1px solid rgba(59,130,246,0.25); }
+  .scattering { background: rgba(245,158,11,0.12); color: var(--amber); border: 1px solid rgba(245,158,11,0.25); }
+
+  /* ── RESULTS ── */
+  .results-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.2rem;
+    margin-top: 2rem;
+  }
+  .result-card {
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+  .result-card:hover { border-color: var(--border-bright); }
+  .result-card-top {
+    padding: 1.3rem 1.5rem 0.8rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .result-liquid-name {
+    font-family: var(--sans);
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--heading);
+  }
+  .result-liquid-formula {
+    font-family: var(--mono);
+    font-size: 0.62rem;
+    color: var(--text-muted);
+    margin-top: 0.15rem;
+  }
+  .corr-badge {
+    font-family: var(--mono);
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--cyan);
+    background: var(--cyan-dim);
+    border: 1px solid var(--border-bright);
+    border-radius: 6px;
+    padding: 0.3rem 0.7rem;
+  }
+  .result-card-body {
+    padding: 1rem 1.5rem 1.3rem;
+  }
+  .result-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.8rem;
+    padding: 0.3rem 0;
+  }
+  .result-row .rl { color: var(--text-dim); }
+  .result-row .rv {
+    font-family: var(--mono);
+    font-size: 0.78rem;
+  }
+  .corr-bar-wrap {
+    margin-top: 0.8rem;
+    background: var(--bg-3);
+    border-radius: 4px;
+    height: 4px;
+    overflow: hidden;
+  }
+  .corr-bar {
+    height: 100%;
+    border-radius: 4px;
+    background: linear-gradient(90deg, var(--cyan), #00f2ff);
+    transition: width 1.2s ease;
+  }
+  .corr-label {
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    color: var(--text-muted);
+    margin-top: 0.4rem;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  /* ── CONFUSION MATRIX TABLE ── */
+  .cm-section { margin-top: 3rem; }
+  .cm-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+  }
+  .cm-card {
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .cm-card-header {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    padding: 1rem 1.3rem;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg-3);
+  }
+  .cm-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .cm-name { font-family: var(--sans); font-size: 0.85rem; font-weight: 700; color: var(--heading); }
+  .cm-formula { font-family: var(--mono); font-size: 0.6rem; color: var(--text-muted); }
+  .cm-body { padding: 1.2rem 1.3rem; }
+  .metrics-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.8rem;
+    margin-bottom: 1rem;
+  }
+  .metric {
+    background: var(--bg-3);
+    border-radius: 6px;
+    padding: 0.7rem 0.9rem;
+    text-align: center;
+  }
+  .metric-label {
+    font-family: var(--mono);
+    font-size: 0.58rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.3rem;
+  }
+  .metric-value {
+    font-family: var(--mono);
+    font-size: 1.15rem;
+    font-weight: 500;
+    color: var(--cyan);
+  }
+  .metric-value.perfect { color: var(--green); }
+  .metric-value.warn { color: var(--amber); }
+  .cm-matrix {
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    text-align: center;
+  }
+  .cm-matrix .cm-row { display: grid; grid-template-columns: 1.5fr 1fr 1fr; }
+  .cm-cell {
+    padding: 0.55rem 0.4rem;
+    border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    color: var(--text-dim);
+  }
+  .cm-cell:last-child { border-right: none; }
+  .cm-cell.header-cell { background: var(--bg-3); color: var(--text-muted); font-size: 0.6rem; letter-spacing: 0.05em; }
+  .cm-cell.tp { background: rgba(16,185,129,0.12); color: var(--green); font-weight: 500; font-size: 1rem; }
+  .cm-cell.tn { background: rgba(16,185,129,0.07); color: var(--green); font-size: 1rem; }
+  .cm-cell.fp { background: rgba(239,68,68,0.07); color: rgba(239,68,68,0.7); }
+  .cm-cell.fn { background: rgba(239,68,68,0.07); color: rgba(239,68,68,0.7); }
+
+  /* ── NEURAL NETWORK ── */
+  .nn-section {
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 2.5rem;
+    margin-top: 3rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .nn-section::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--amber), transparent);
+  }
+  .nn-archs {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 0.8rem;
+    margin-top: 1.8rem;
+  }
+  .arch-card {
+    background: var(--bg-3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem 1.2rem;
+    position: relative;
+    transition: border-color 0.2s;
+  }
+  .arch-card.winner {
+    border-color: var(--amber);
+    background: rgba(245,158,11,0.05);
+  }
+  .arch-card.winner::before {
+    content: '★ BEST';
+    position: absolute;
+    top: 0.6rem;
+    right: 0.8rem;
+    font-family: var(--mono);
+    font-size: 0.55rem;
+    letter-spacing: 0.1em;
+    color: var(--amber);
+  }
+  .arch-name {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    color: var(--text-dim);
+    margin-bottom: 0.5rem;
+  }
+  .arch-acc {
+    font-family: var(--sans);
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--heading);
+  }
+  .arch-acc.winner-acc { color: var(--amber); }
+  .arch-bar-wrap {
+    margin-top: 0.6rem;
+    background: var(--bg-0);
+    border-radius: 3px;
+    height: 3px;
+  }
+  .arch-bar {
+    height: 100%;
+    border-radius: 3px;
+    background: var(--text-muted);
+  }
+  .arch-bar.winner-bar { background: var(--amber); }
+
+  /* ── CLASSIFICATION APPROACHES ── */
+  .approach-split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-top: 2rem;
+  }
+  @media (max-width: 700px) { .approach-split { grid-template-columns: 1fr; } }
+  .approach-block {
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.8rem;
+  }
+  .approach-label {
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--cyan);
+    margin-bottom: 0.5rem;
+  }
+  .approach-title {
+    font-family: var(--sans);
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--heading);
+    margin-bottom: 1rem;
+  }
+  .approach-body {
+    font-size: 0.87rem;
+    color: var(--text-dim);
+    line-height: 1.75;
+  }
+  ul.approach-list {
+    list-style: none;
+    margin-top: 0.8rem;
+  }
+  ul.approach-list li {
+    display: flex;
+    gap: 0.6rem;
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    margin-bottom: 0.5rem;
+    line-height: 1.6;
+  }
+  ul.approach-list li::before {
+    content: '→';
+    color: var(--cyan);
+    flex-shrink: 0;
+    margin-top: 0.05em;
+  }
+
+  /* ── SPECTRUM TABLE ── */
+  .spec-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.84rem;
+    margin-top: 1.5rem;
+  }
+  .spec-table th {
+    background: var(--bg-3);
+    color: var(--cyan);
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 0.75rem 1.2rem;
+    text-align: left;
+    border-bottom: 2px solid var(--border-bright);
+  }
+  .spec-table td {
+    padding: 0.75rem 1.2rem;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-dim);
+  }
+  .spec-table tr:hover td { background: var(--cyan-dim); }
+  .wave-range {
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    color: var(--text);
+  }
+
+  /* ── SVD SECTION ── */
+  .svd-visual {
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 2rem;
+    margin: 1.5rem 0;
+  }
+  .svd-eq {
+    font-family: var(--mono);
+    font-size: 1.1rem;
+    color: var(--cyan);
+    text-align: center;
+    padding: 1.5rem;
+    background: var(--bg-3);
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    letter-spacing: 0.05em;
+  }
+  .svd-eq .dim { color: var(--text-muted); font-size: 0.65rem; vertical-align: super; }
+  .svd-components {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  .svd-comp {
+    flex: 1;
+    min-width: 140px;
+    background: var(--bg-3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem;
+    text-align: center;
+  }
+  .svd-comp-letter {
+    font-family: var(--mono);
+    font-size: 1.8rem;
+    color: var(--cyan);
+    font-weight: 300;
+    margin-bottom: 0.3rem;
+  }
+  .svd-comp-name {
+    font-family: var(--sans);
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--text-dim);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .svd-comp-desc {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    margin-top: 0.4rem;
+    line-height: 1.55;
+  }
+
+  /* ── KEY FINDINGS / STAT CARDS ── */
+  .stat-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 1rem;
+    margin: 2.5rem 0;
+  }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.4rem 1.2rem;
+    text-align: center;
+    transition: border-color 0.2s;
+  }
+  .stat-card:hover { border-color: var(--border-bright); }
+  .stat-val {
+    font-family: var(--sans);
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--cyan);
+    line-height: 1;
+    margin-bottom: 0.4rem;
+  }
+  .stat-val.amber-val { color: var(--amber); }
+  .stat-val.green-val { color: var(--green); }
+  .stat-label {
+    font-family: var(--mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    line-height: 1.4;
+  }
+
+  /* ── CONCLUSION / FUTURE ── */
+  .conclusion-block {
+    background: linear-gradient(135deg, rgba(0,210,200,0.04), rgba(0,210,200,0.01));
+    border: 1px solid var(--border-bright);
+    border-radius: 12px;
+    padding: 2.5rem 3rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .conclusion-block::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--cyan), transparent);
+  }
+  .conclusion-block p {
+    font-size: 1.05rem;
+    line-height: 1.85;
+    color: var(--text);
+    margin-bottom: 1rem;
+  }
+  .conclusion-block p:last-child { margin-bottom: 0; }
+
+  .future-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.2rem;
+    margin-top: 2rem;
+  }
+  .future-card {
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.5rem;
+    border-top: 2px solid var(--amber);
+    transition: transform 0.2s;
+  }
+  .future-card:hover { transform: translateY(-3px); }
+  .future-card h4 {
+    font-family: var(--sans);
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--heading);
+    margin-bottom: 0.6rem;
+  }
+  .future-card p {
+    font-size: 0.84rem;
+    color: var(--text-dim);
+    line-height: 1.7;
+  }
+
+  /* ── ABBREV TABLE ── */
+  .abbrev-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.84rem;
+  }
+  .abbrev-table td {
+    padding: 0.55rem 1rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .abbrev-table td:first-child {
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    color: var(--cyan);
+    font-weight: 500;
+    width: 80px;
+  }
+  .abbrev-table td:last-child { color: var(--text-dim); }
+  .abbrev-table tr:hover td { background: var(--cyan-dim); }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--bg-1);
+    border-top: 1px solid var(--border);
+    padding: 2.5rem 2rem;
+    text-align: center;
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    color: var(--text-muted);
+    letter-spacing: 0.08em;
+    position: relative;
+  }
+  footer p { margin-bottom: 0.3rem; }
+  footer .footer-title {
+    font-family: var(--sans);
+    font-size: 0.8rem;
+    color: var(--cyan);
+    margin-bottom: 0.8rem;
+    font-weight: 600;
+  }
+
+  /* ── ANIMATIONS ON SCROLL (CSS-only approx) ── */
+  .fade-up {
+    opacity: 0;
+    transform: translateY(24px);
+    animation: fade-up 0.7s ease forwards;
+  }
+  @keyframes fade-up { to { opacity: 1; transform: translateY(0); } }
+  .fade-up-1 { animation-delay: 0.05s; }
+  .fade-up-2 { animation-delay: 0.12s; }
+  .fade-up-3 { animation-delay: 0.2s; }
+  .fade-up-4 { animation-delay: 0.28s; }
+  .fade-up-5 { animation-delay: 0.36s; }
+
+  /* ── HIGHLIGHT BOX ── */
+  .highlight-box {
+    background: var(--amber-dim);
+    border-left: 3px solid var(--amber);
+    border-radius: 0 8px 8px 0;
+    padding: 1.2rem 1.5rem;
+    margin: 1.5rem 0;
+    font-size: 0.9rem;
+    color: var(--text);
+    line-height: 1.75;
+  }
+  .highlight-box strong { color: var(--amber); }
+
+  /* ── QUOTE / FORMULA ── */
+  .formula-box {
+    background: var(--bg-3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.2rem 1.8rem;
+    text-align: center;
+    font-family: var(--mono);
+    font-size: 0.95rem;
+    color: var(--cyan);
+    margin: 1rem 0;
+    letter-spacing: 0.05em;
+  }
+  .formula-note {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    margin-top: 0.5rem;
+    text-align: center;
+  }
+
+  p.body-text {
+    font-size: 0.95rem;
+    color: var(--text-dim);
+    line-height: 1.85;
+    margin-bottom: 1rem;
+    max-width: 780px;
+  }
+
+  @media (max-width: 600px) {
+    .hero { padding: 8rem 1.2rem 5rem; }
+    .section { padding: 4rem 1.2rem; }
+    nav .nav-links { display: none; }
+    .conclusion-block { padding: 1.8rem 1.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAVIGATION -->
+<nav>
+  <div class="nav-inner">
+    <div class="nav-brand">Thesis / Physics / 2018</div>
+    <ul class="nav-links">
+      <li><a href="#intro">Introduction</a></li>
+      <li><a href="#instrument">Instrument</a></li>
+      <li><a href="#methodology">Methodology</a></li>
+      <li><a href="#results">Results</a></li>
+      <li><a href="#classification">Classification</a></li>
+      <li><a href="#conclusion">Conclusion</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="top">
+  <div class="hero-orbs">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+  </div>
+  <div class="hero-inner">
+    <div class="hero-tag fade-up fade-up-1">Undergraduate Thesis — University of Colombo</div>
+    <h1 class="hero-title fade-up fade-up-2">
+      Development of a Combinatorial <em>Optical Property</em> Measuring System for Classification & Quantification of Liquids
+    </h1>
+    <div class="hero-meta fade-up fade-up-3">
+      <div class="meta-item"><span>Author</span><span>S.A.D.A. Dayarathna</span></div>
+      <div class="meta-item"><span>Degree</span><span>BSc Special — Engineering Physics</span></div>
+      <div class="meta-item"><span>University</span><span>University of Colombo, Sri Lanka</span></div>
+      <div class="meta-item"><span>Year</span><span>December 2018</span></div>
+      <div class="meta-item"><span>Supervisor</span><span>Dr. Hiran H.E. Jayaweera</span></div>
+    </div>
+    <div class="hero-abstract fade-up fade-up-4">
+      A non-destructive optical property measuring system capable of measuring transmittance, absorption, refraction, and scattering of liquids was designed and constructed. Using LEDs spanning 375–850 nm, Hamamatsu photodiodes with transimpedance amplifiers, and a 48 kS/s DAQ system with a quartz tube sample holder, the device takes a full measurement within 15 seconds. Multivariate analysis (SVD) was used for data compression. Machine learning — supervised (SVD matrix model), unsupervised (PCA, hierarchical clustering), and an artificial neural network — was applied to quantify and classify liquids. Tests were conducted on KMnO₄, CuSO₄, Co(CH₃COO)₂·4H₂O, K₂Cr₂O₇ (non-scattering) and milk (scattering), achieving classification specificity and precision of 1.0 for all five liquids, with neural network validation accuracy of 91.86%.
+    </div>
+    <div class="hero-badges fade-up fade-up-5">
+      <span class="badge">Optical Spectroscopy</span>
+      <span class="badge">Machine Learning</span>
+      <span class="badge">SVD Compression</span>
+      <span class="badge">PCA Clustering</span>
+      <span class="badge">Neural Network</span>
+      <span class="badge amber">Non-Destructive Measurement</span>
+      <span class="badge amber">LED Array System</span>
+    </div>
+  </div>
+  <div class="scroll-hint">
+    <span>Scroll</span>
+    <div class="arrow"></div>
+  </div>
+</section>
+
+<hr class="section-divider">
+
+<!-- INTRODUCTION -->
+<section class="section" id="intro">
+  <div class="section-header">
+    <div class="section-num">01 — Introduction</div>
+    <h2 class="section-title">Background & Objective</h2>
+    <p class="section-lead">A combinatorial, non-destructive optical measurement device for identifying and classifying liquid samples using machine learning techniques.</p>
+  </div>
+
+  <p class="body-text">Measurements are one of the most fundamental concepts in science, used to determine properties of an object by comparing them to a standard. Optical measurements are particularly advantageous as they enable non-destructive, non-invasive, high-accuracy, and near-instant measurements with machine vision. Applications range from monitoring fertilizer concentrations in agriculture to assessing water purity.</p>
+
+  <p class="body-text">The key challenge addressed by this project is that optical properties of liquids — transmittance, absorption, refraction, and nephelometric scattering — are <strong>interdependent</strong>. Individual measurements alone cannot reliably quantify or classify liquids; a <em>combinatorial</em> approach is required. The system was therefore designed to simultaneously acquire all four optical properties in a single scan.</p>
+
+  <div class="stat-row">
+    <div class="stat-card"><div class="stat-val">15 s</div><div class="stat-label">Time per sample measurement</div></div>
+    <div class="stat-card"><div class="stat-val">11</div><div class="stat-label">LED wavelengths used</div></div>
+    <div class="stat-card"><div class="stat-val">5</div><div class="stat-label">Liquid types tested</div></div>
+    <div class="stat-card"><div class="stat-val amber-val">91.86%</div><div class="stat-label">Neural network validation accuracy</div></div>
+    <div class="stat-card"><div class="stat-val green-val">1.0</div><div class="stat-label">Specificity & precision — all 5 liquids</div></div>
+    <div class="stat-card"><div class="stat-val">48 kS/s</div><div class="stat-label">DAQ sampling rate</div></div>
+  </div>
+
+  <div class="section-header" style="margin-top:3.5rem;">
+    <div class="section-num">01.1 — Objective</div>
+    <h2 class="section-title" style="font-size:1.6rem;">Project Goal</h2>
+  </div>
+  <p class="body-text">The main objective was to use LEDs of different wavelengths (in the visible region) together with photodetectors to measure combinatorial optical properties — transmittance, nephelometric scattering, and absorption — simultaneously. Since these properties are interdependent and cannot be measured in isolation, a combined instrument was developed and trained using data compression and multivariate analysis techniques to classify and quantify liquid samples.</p>
+
+  <div class="highlight-box">
+    <strong>Key insight:</strong> Because optical properties of liquids are interdependent, measuring them individually is insufficient. This system combines all measurements in a single instrument and uses machine learning to extract useful information from the combined data.
+  </div>
+</section>
+
+<hr class="section-divider">
+
+<!-- INSTRUMENT -->
+<section class="section" id="instrument">
+  <div class="section-header">
+    <div class="section-num">02 — Instrument</div>
+    <h2 class="section-title">Construction of the Optical System</h2>
+    <p class="section-lead">A custom-built aluminium-housed instrument integrating LED arrays, photodiode arrays, transimpedance amplifiers, and a DAQ card — all controlled via software.</p>
+  </div>
+
+  <div class="approach-split">
+    <div class="approach-block">
+      <div class="approach-label">Optical Design</div>
+      <div class="approach-title">Hardware Layout</div>
+      <div class="approach-body">
+        A quartz tube was used as the sample holder due to its excellent transmittance across both UV and visible spectral regions (unlike glass, which is limited to the visible range). An aluminium tube was fitted around it to block ambient light. Holes were drilled at 90° and 180° to mount LEDs and photodiodes for transmittance and nephelometric scattering detection simultaneously.
+        <ul class="approach-list" style="margin-top:1rem;">
+          <li>Two LED arrays per wavelength, mounted normal to the emission axis</li>
+          <li>Hamamatsu S5971 photodiodes — large active area, high quantum efficiency, wide spectral response</li>
+          <li>90° array: captures nephelometric (side) scattering</li>
+          <li>180° array: captures transmitted light</li>
+          <li>Eight photodiodes total, all activated for each LED scan</li>
+        </ul>
+      </div>
+    </div>
+    <div class="approach-block">
+      <div class="approach-label">Electronic Design</div>
+      <div class="approach-title">Signal Chain</div>
+      <div class="approach-body">
+        LEDs were driven with constant-current sources to maintain stable output power, grouped into 20 mA, 30 mA, and 40 mA categories. An Arduino Nano microcontroller switched LEDs one by one using C828 BJT transistors. Photodiode photocurrents were converted to voltages via transimpedance amplifiers, then digitised by a 14-bit ADC in the NI-USB 6009 DAQ card at up to 48 kS/s.
+        <ul class="approach-list" style="margin-top:1rem;">
+          <li>Current drivers used (not voltage) to avoid thermal runaway in LEDs</li>
+          <li>Transimpedance amplifier: current → usable voltage, more linear response</li>
+          <li>14-bit ADC for high-resolution digitisation</li>
+          <li>Firmware on Arduino controls LED sequencing via COM port commands</li>
+          <li>Data saved in binary files after each complete scan</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-header" style="margin-top:3.5rem;">
+    <div class="section-num">02.1</div>
+    <h2 class="section-title" style="font-size:1.5rem;">LED Specifications</h2>
+  </div>
+  <p class="body-text">Eleven 5 mm standard LEDs from Roithner Laser were used, spanning 375 nm to 810 nm. LEDs were selected because their ~30 nm full-width at half maximum (FWHM) makes them well-suited for liquids that absorb broad ranges of wavelengths, unlike sharp-line lasers. They are also low-cost and produce high-quality output.</p>
+
+  <table class="led-table">
+    <thead>
+      <tr>
+        <th>Wavelength</th>
+        <th>Part No.</th>
+        <th>Output Power</th>
+        <th>Max Current</th>
+        <th>Colour Region</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td><div class="wave-bar"><div class="wave-dot" style="background:#a020f0"></div>375 nm</div></td><td>LED375-04</td><td>2.5 mW</td><td>20 mA</td><td>UV-Violet</td></tr>
+      <tr><td><div class="wave-bar"><div class="wave-dot" style="background:#8b00ff"></div>405 nm</div></td><td>LED405-06V</td><td>15 mW</td><td>20 mA</td><td>Violet</td></tr>
+      <tr><td><div class="wave-bar"><div class="wave-dot" style="background:#5b0de8"></div>435 nm</div></td><td>LED435-03</td><td>20 mW</td><td>20 mA</td><td>Violet-Blue</td></tr>
+      <tr><td><div class="wave-bar"><div class="wave-dot" style="background:#1e90ff"></div>450 nm</div></td><td>LED450-06</td><td>20 mW</td><td>20 mA</td><td>Blue</td></tr>
+      <tr><td><div class="wave-bar"><div class="wave-dot" style="background:#00c800"></div>535 nm</div></td><td>LED535-01</td><td>4 mW</td><td>20 mA</td><td>Green</td></tr>
+      <tr><td><div class="wave-bar"><div class="wave-dot" style="background:#ffae00"></div>590 nm</div></td><td>LED590-03</td><td>4 mW</td><td>20 mA</td><td>Amber</td></tr>
+      <tr><td><div class="wave-bar"><div class="wave-dot" style="background:#cc0000"></div>660 nm</div></td><td>LED660N-03</td><td>15 mW</td><td>20 mA</td><td>Red</td></tr>
+      <tr><td><div class="wave-bar"><div class="wave-dot" style="background:#b00000"></div>690 nm</div></td><td>LED690-01AU</td><td>4 mW</td><td>20 mA</td><td>Deep Red</td></tr>
+      <tr><td><div class="wave-bar"><div class="wave-dot" style="background:#8b0000"></div>720 nm</div></td><td>ELD-720-524</td><td>7 mW</td><td>20 mA</td><td>Near-IR</td></tr>
+      <tr><td><div class="wave-bar"><div class="wave-dot" style="background:#660000"></div>760 nm</div></td><td>LED760-6-30</td><td>6–7 mW</td><td>20 mA</td><td>Near-IR</td></tr>
+      <tr><td><div class="wave-bar"><div class="wave-dot" style="background:#400000"></div>810 nm</div></td><td>LED810-03AU</td><td>18 mW</td><td>50 mA</td><td>Near-IR</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<hr class="section-divider">
+
+<!-- SAMPLES -->
+<section class="section" id="samples">
+  <div class="section-header">
+    <div class="section-num">03 — Samples</div>
+    <h2 class="section-title">Liquid Samples Used</h2>
+    <p class="section-lead">Five liquids were selected — four non-scattering coloured solutions and one scattering solution — to test the system's quantification and classification capabilities.</p>
+  </div>
+
+  <div class="grid-3" style="margin-top:2rem;">
+    <div class="sample-card">
+      <div class="sample-header">
+        <div class="sample-color-dot" style="background:#8b00ff"></div>
+        <div>
+          <div class="sample-name">Potassium Permanganate</div>
+          <div class="sample-formula">KMnO₄ — Molar mass: 158.03 g mol⁻¹</div>
+        </div>
+      </div>
+      <div class="sample-body">
+        <div class="sample-meta-row"><span class="label">Type</span><span class="value"><span class="sample-type-badge non-scattering">Non-scattering</span></span></div>
+        <div class="sample-meta-row"><span class="label">Colour</span><span class="value">Dark violet / purple</span></div>
+        <div class="sample-meta-row"><span class="label">Initial conc.</span><span class="value">0.01 mol dm⁻³</span></div>
+        <div class="sample-meta-row"><span class="label">No. of samples</span><span class="value">35 diluted samples</span></div>
+        <div class="sample-meta-row"><span class="label">Dilution method</span><span class="value">+5 ml H₂O each step</span></div>
+        <div class="sample-meta-row"><span class="label">Transmittance peak</span><span class="value">380–450 nm (violet)</span></div>
+      </div>
+    </div>
+    <div class="sample-card">
+      <div class="sample-header">
+        <div class="sample-color-dot" style="background:#1e90ff"></div>
+        <div>
+          <div class="sample-name">Copper Sulphate</div>
+          <div class="sample-formula">CuSO₄ — Molar mass: 249.68 g mol⁻¹</div>
+        </div>
+      </div>
+      <div class="sample-body">
+        <div class="sample-meta-row"><span class="label">Type</span><span class="value"><span class="sample-type-badge non-scattering">Non-scattering</span></span></div>
+        <div class="sample-meta-row"><span class="label">Colour</span><span class="value">Blue</span></div>
+        <div class="sample-meta-row"><span class="label">Initial conc.</span><span class="value">0.1 mol dm⁻³</span></div>
+        <div class="sample-meta-row"><span class="label">No. of samples</span><span class="value">40 diluted samples</span></div>
+        <div class="sample-meta-row"><span class="label">Dilution method</span><span class="value">+5 ml H₂O each step</span></div>
+        <div class="sample-meta-row"><span class="label">Transmittance peak</span><span class="value">530–570 nm (green)</span></div>
+      </div>
+    </div>
+    <div class="sample-card">
+      <div class="sample-header">
+        <div class="sample-color-dot" style="background:#e63946"></div>
+        <div>
+          <div class="sample-name">Cobalt(II) Acetate Tetrahydrate</div>
+          <div class="sample-formula">Co(CH₃COO)₂·4H₂O — Molar mass: 249.03 g mol⁻¹</div>
+        </div>
+      </div>
+      <div class="sample-body">
+        <div class="sample-meta-row"><span class="label">Type</span><span class="value"><span class="sample-type-badge non-scattering">Non-scattering</span></span></div>
+        <div class="sample-meta-row"><span class="label">Colour</span><span class="value">Red</span></div>
+        <div class="sample-meta-row"><span class="label">Initial conc.</span><span class="value">0.1 mol dm⁻³</span></div>
+        <div class="sample-meta-row"><span class="label">No. of samples</span><span class="value">40 diluted samples</span></div>
+        <div class="sample-meta-row"><span class="label">Dilution method</span><span class="value">+5 ml H₂O each step</span></div>
+        <div class="sample-meta-row"><span class="label">Transmittance peaks</span><span class="value">350–360 nm / 610–700 nm</span></div>
+      </div>
+    </div>
+    <div class="sample-card">
+      <div class="sample-header">
+        <div class="sample-color-dot" style="background:#ffae00"></div>
+        <div>
+          <div class="sample-name">Potassium Dichromate</div>
+          <div class="sample-formula">K₂Cr₂O₇ — Molar mass: 294.19 g mol⁻¹</div>
+        </div>
+      </div>
+      <div class="sample-body">
+        <div class="sample-meta-row"><span class="label">Type</span><span class="value"><span class="sample-type-badge non-scattering">Non-scattering</span></span></div>
+        <div class="sample-meta-row"><span class="label">Colour</span><span class="value">Orange</span></div>
+        <div class="sample-meta-row"><span class="label">Initial conc.</span><span class="value">0.02 mol dm⁻³</span></div>
+        <div class="sample-meta-row"><span class="label">No. of samples</span><span class="value">29–30 diluted samples</span></div>
+        <div class="sample-meta-row"><span class="label">Dilution method</span><span class="value">+5 ml H₂O each step</span></div>
+        <div class="sample-meta-row"><span class="label">Transmittance peaks</span><span class="value">350–360 nm / 575–700 nm</span></div>
+      </div>
+    </div>
+    <div class="sample-card">
+      <div class="sample-header">
+        <div class="sample-color-dot" style="background:#f5f0e8;border:1px solid #555;"></div>
+        <div>
+          <div class="sample-name">Milk</div>
+          <div class="sample-formula">Fresh whole milk (aqueous scattering medium)</div>
+        </div>
+      </div>
+      <div class="sample-body">
+        <div class="sample-meta-row"><span class="label">Type</span><span class="value"><span class="sample-type-badge scattering">Scattering</span></span></div>
+        <div class="sample-meta-row"><span class="label">Colour</span><span class="value">White / opaque</span></div>
+        <div class="sample-meta-row"><span class="label">Initial volume</span><span class="value">35 ml fresh milk</span></div>
+        <div class="sample-meta-row"><span class="label">No. of samples</span><span class="value">24 diluted samples</span></div>
+        <div class="sample-meta-row"><span class="label">Dilution method</span><span class="value">+5 ml H₂O each step</span></div>
+        <div class="sample-meta-row"><span class="label">Scattering mechanism</span><span class="value">Suspended milk particles scatter all light</span></div>
+      </div>
+    </div>
+    <div class="sample-card">
+      <div class="sample-header">
+        <div class="sample-color-dot" style="background:#9b59b6"></div>
+        <div>
+          <div class="sample-name">KMnO₄ + NaOH (Base Mix)</div>
+          <div class="sample-formula">Mixed base solution series — 30 samples</div>
+        </div>
+      </div>
+      <div class="sample-body">
+        <div class="sample-meta-row"><span class="label">Purpose</span><span class="value">Test classification in base environment</span></div>
+        <div class="sample-meta-row"><span class="label">Base used</span><span class="value">NaOH, 0.1 mol dm⁻³</span></div>
+        <div class="sample-meta-row"><span class="label">No. of samples</span><span class="value">30 mixed samples</span></div>
+        <div class="sample-meta-row"><span class="label">Total samples</span><span class="value">65 (KMnO₄ + mixed)</span></div>
+        <div class="sample-meta-row"><span class="label">Objective</span><span class="value">Classify liquid when mixed with base</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="highlight-box" style="margin-top:2rem;">
+    <strong>Reference measurements:</strong> For all liquids, a white reference was taken with water (H₂O) in the quartz tube with all LEDs active, and a dark reference was taken with all LEDs switched off. These baselines were used to normalise all subsequent measurements.
+  </div>
+</section>
+
+<hr class="section-divider">
+
+<!-- METHODOLOGY -->
+<section class="section" id="methodology">
+  <div class="section-header">
+    <div class="section-num">04 — Methodology</div>
+    <h2 class="section-title">Data Acquisition & Analysis Pipeline</h2>
+    <p class="section-lead">A multi-stage pipeline: raw optical data → SVD compression → supervised & unsupervised machine learning → quantification and classification.</p>
+  </div>
+
+  <div class="process-list">
+    <div class="process-step">
+      <div class="step-num">01</div>
+      <div class="step-content">
+        <h4>Data Acquisition</h4>
+        <p>Each LED in both arrays is activated sequentially by the Arduino microcontroller. All eight photodiodes are active simultaneously, capturing both transmitted (180°) and scattered (90°) light. The DAQ card records voltage outputs from each photodiode at 48 kS/s, producing a large dataset for every sample. One complete scan takes 15 seconds per sample.</p>
+        <span class="step-tag">Hardware Phase</span>
+      </div>
+    </div>
+    <div class="process-step">
+      <div class="step-num">02</div>
+      <div class="step-content">
+        <h4>Data Compression — Singular Value Decomposition (SVD)</h4>
+        <p>Due to the high sampling rate, each sample produces a very large dataset. SVD factorises the data matrix A into three matrices: <strong>A = U S Vᵀ</strong>. The diagonal elements of S (singular values) are ranked by significance. Only the highest-significance principal components (typically 5–7) are retained, capturing ≥80% of the data while discarding noise. The truncated left singular vectors (U) are then used for modelling.</p>
+        <span class="step-tag">Unsupervised — Dimensionality Reduction</span>
+      </div>
+    </div>
+    <div class="process-step">
+      <div class="step-num">03a</div>
+      <div class="step-content">
+        <h4>Concentration Quantification — Supervised Matrix Model</h4>
+        <p>A model matrix A is derived from known concentration data (expert matrix E) using the relation <strong>E = U × A</strong>, solved as <strong>A = E · U⁻¹</strong>. Leave-one-out cross-validation is applied: for each of n samples, the model is rebuilt without that sample, then used to predict its concentration. Predicted values are plotted against real values; correlation coefficients and residuals are computed to assess fit quality.</p>
+        <span class="step-tag">Supervised Machine Learning</span>
+      </div>
+    </div>
+    <div class="process-step">
+      <div class="step-num">03b</div>
+      <div class="step-content">
+        <h4>Classification — Approach I: Statistical Clustering (PCA + Hierarchical)</h4>
+        <p>All liquid datasets are merged and compressed together via SVD. The first three principal components are plotted in a 3D scatter plot to visualise natural clusters. Additionally, a hierarchical clustering dendrogram is generated using pairwise Euclidean distances (MATLAB's pdist and linkage functions), grouping samples by similarity. Confusion matrices are then computed for each liquid to quantify specificity, sensitivity, accuracy, and precision.</p>
+        <span class="step-tag">Unsupervised Machine Learning</span>
+      </div>
+    </div>
+    <div class="process-step">
+      <div class="step-num">03c</div>
+      <div class="step-content">
+        <h4>Classification — Approach II: Artificial Neural Network</h4>
+        <p>A multi-layer neural network was trained using 70% training / 15% validation / 15% test data splits. Both transmittance (180°) and scattering (90°) data were combined into 16 input features. Data was arranged in overlapping blocks of 32 rows. Six network architectures were compared. The best architecture used two hidden layers of 512 nodes each, with dropout regularisation, ReLU activation, and a softmax output layer. A data generator was used to manage the large dataset without exceeding RAM.</p>
+        <span class="step-tag">Deep Learning</span>
+      </div>
+    </div>
+    <div class="process-step">
+      <div class="step-num">04</div>
+      <div class="step-content">
+        <h4>Spectrometric Analysis</h4>
+        <p>An Ocean Optics Flame USB 4000 spectrometer was used separately to record absorption and transmittance spectra for each liquid. Measurements were taken with a halogen lamp inside a light-sealed box, with the sample beaker positioned between lamp and spectrometer. This enabled identification of peak transmittance wavelengths for each liquid, which were compared with the LED wavelengths used in the main instrument.</p>
+        <span class="step-tag">Reference Characterisation</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- SVD Visual -->
+  <div class="section-header" style="margin-top:3.5rem;">
+    <div class="section-num">04.1 — SVD</div>
+    <h2 class="section-title" style="font-size:1.5rem;">Singular Value Decomposition</h2>
+  </div>
+  <div class="svd-visual">
+    <div class="svd-eq">A &nbsp;=&nbsp; U &nbsp;·&nbsp; S &nbsp;·&nbsp; Vᵀ</div>
+    <div class="svd-components">
+      <div class="svd-comp">
+        <div class="svd-comp-letter">U</div>
+        <div class="svd-comp-name">Left Singular Vectors</div>
+        <div class="svd-comp-desc">Gene coefficient vector; columns used as compressed features for modelling</div>
+      </div>
+      <div class="svd-comp">
+        <div class="svd-comp-letter">S</div>
+        <div class="svd-comp-name">Singular Values (diagonal)</div>
+        <div class="svd-comp-desc">Ranked by significance; smallest values are discarded (truncation) to compress data</div>
+      </div>
+      <div class="svd-comp">
+        <div class="svd-comp-letter">Vᵀ</div>
+        <div class="svd-comp-name">Right Singular Vectors</div>
+        <div class="svd-comp-desc">Expression-level vectors; rows represent patterns in the measurement space</div>
+      </div>
+    </div>
+  </div>
+  <p class="body-text" style="margin-top:1rem;">The truncation point was selected by inspecting the plot of singular values (principal component significance vs. index). Typically, the first 5–7 components captured over 80–90% of the data's information, allowing the remaining components to be dropped without significant information loss.</p>
+</section>
+
+<hr class="section-divider">
+
+<!-- RESULTS -->
+<section class="section" id="results">
+  <div class="section-header">
+    <div class="section-num">05 — Results</div>
+    <h2 class="section-title">Concentration Quantification Results</h2>
+    <p class="section-lead">Correlation between predicted and real concentration values, evaluated using the leave-one-out cross-validation statistical model. All liquids showed strong positive relationships.</p>
+  </div>
+
+  <p class="body-text">For each liquid, the correlation coefficient between the real concentrations and the model-predicted concentrations was calculated. A value close to 1.0 indicates a strong positive linear relationship, confirming the system can distinguish different concentrations of the same liquid. Residuals (differences between real and predicted values) were also analysed — a random scatter around zero confirms a good linear model fit, while the sum of residuals in all cases was extremely close to zero (order 10⁻¹³).</p>
+
+  <div class="results-grid">
+    <!-- KMnO4 -->
+    <div class="result-card">
+      <div class="result-card-top">
+        <div>
+          <div class="result-liquid-name">Potassium Permanganate</div>
+          <div class="result-liquid-formula">KMnO₄ — 35 samples</div>
+        </div>
+        <div class="corr-badge">r = 0.99</div>
+      </div>
+      <div class="result-card-body">
+        <div class="result-row"><span class="rl">Principal components retained</span><span class="rv" style="color:var(--cyan)">5</span></div>
+        <div class="result-row"><span class="rl">Data significance captured</span><span class="rv" style="color:var(--cyan)">87.6%</span></div>
+        <div class="result-row"><span class="rl">Std. deviation (residuals)</span><span class="rv">5.27</span></div>
+        <div class="result-row"><span class="rl">Std. error (residuals)</span><span class="rv">0.89</span></div>
+        <div class="result-row"><span class="rl">Sum of residuals</span><span class="rv">9.66 × 10⁻¹³</span></div>
+        <div class="corr-bar-wrap"><div class="corr-bar" style="width:99%"></div></div>
+        <div class="corr-label"><span>0</span><span>r = 0.99 — Strong positive correlation</span><span>1</span></div>
+      </div>
+    </div>
+    <!-- CuSO4 -->
+    <div class="result-card">
+      <div class="result-card-top">
+        <div>
+          <div class="result-liquid-name">Copper Sulphate</div>
+          <div class="result-liquid-formula">CuSO₄ — 40 samples</div>
+        </div>
+        <div class="corr-badge">r = 0.99</div>
+      </div>
+      <div class="result-card-body">
+        <div class="result-row"><span class="rl">Principal components retained</span><span class="rv" style="color:var(--cyan)">7</span></div>
+        <div class="result-row"><span class="rl">Data significance captured</span><span class="rv" style="color:var(--cyan)">89.5%</span></div>
+        <div class="result-row"><span class="rl">Std. deviation (residuals)</span><span class="rv">9.88</span></div>
+        <div class="result-row"><span class="rl">Std. error (residuals)</span><span class="rv">1.56</span></div>
+        <div class="result-row"><span class="rl">Sum of residuals</span><span class="rv">−2.24 × 10⁻¹³</span></div>
+        <div class="corr-bar-wrap"><div class="corr-bar" style="width:99%"></div></div>
+        <div class="corr-label"><span>0</span><span>r = 0.99 — Normal distribution of residuals</span><span>1</span></div>
+      </div>
+    </div>
+    <!-- Co -->
+    <div class="result-card">
+      <div class="result-card-top">
+        <div>
+          <div class="result-liquid-name">Cobalt(II) Acetate Tetrahydrate</div>
+          <div class="result-liquid-formula">Co(CH₃COO)₂·4H₂O — 40 samples</div>
+        </div>
+        <div class="corr-badge">r = 0.97</div>
+      </div>
+      <div class="result-card-body">
+        <div class="result-row"><span class="rl">Principal components retained</span><span class="rv" style="color:var(--cyan)">7</span></div>
+        <div class="result-row"><span class="rl">Data significance captured</span><span class="rv" style="color:var(--cyan)">89.3%</span></div>
+        <div class="result-row"><span class="rl">Std. deviation (residuals)</span><span class="rv">12.72</span></div>
+        <div class="result-row"><span class="rl">Std. error (residuals)</span><span class="rv">2.01</span></div>
+        <div class="result-row"><span class="rl">Sum of residuals</span><span class="rv">5.26 × 10⁻¹³</span></div>
+        <div class="corr-bar-wrap"><div class="corr-bar" style="width:97%"></div></div>
+        <div class="corr-label"><span>0</span><span>r = 0.97 — Strong correlation</span><span>1</span></div>
+      </div>
+    </div>
+    <!-- K2Cr2O7 -->
+    <div class="result-card">
+      <div class="result-card-top">
+        <div>
+          <div class="result-liquid-name">Potassium Dichromate</div>
+          <div class="result-liquid-formula">K₂Cr₂O₇ — 29 samples</div>
+        </div>
+        <div class="corr-badge" style="color:var(--amber);background:var(--amber-dim);border-color:rgba(245,158,11,0.35)">r = 0.85</div>
+      </div>
+      <div class="result-card-body">
+        <div class="result-row"><span class="rl">Principal components retained</span><span class="rv" style="color:var(--cyan)">5</span></div>
+        <div class="result-row"><span class="rl">Data significance captured</span><span class="rv" style="color:var(--cyan)">80.47%</span></div>
+        <div class="result-row"><span class="rl">Std. deviation (residuals)</span><span class="rv">12.36 (outlier removed)</span></div>
+        <div class="result-row"><span class="rl">Std. error (residuals)</span><span class="rv">2.34</span></div>
+        <div class="result-row"><span class="rl">Sum of residuals</span><span class="rv">5.54 × 10⁻¹³</span></div>
+        <div class="corr-bar-wrap"><div class="corr-bar" style="width:85%;background:linear-gradient(90deg,var(--amber),#fcd34d)"></div></div>
+        <div class="corr-label"><span>0</span><span>r = 0.85 — Outlier detected (acquisition issue)</span><span>1</span></div>
+      </div>
+    </div>
+    <!-- Milk -->
+    <div class="result-card">
+      <div class="result-card-top">
+        <div>
+          <div class="result-liquid-name">Milk (Scattering Liquid)</div>
+          <div class="result-liquid-formula">Fresh milk — 24 samples</div>
+        </div>
+        <div class="corr-badge" style="color:var(--amber);background:var(--amber-dim);border-color:rgba(245,158,11,0.35)">r = 0.87</div>
+      </div>
+      <div class="result-card-body">
+        <div class="result-row"><span class="rl">Principal components retained</span><span class="rv" style="color:var(--cyan)">5</span></div>
+        <div class="result-row"><span class="rl">Data significance captured</span><span class="rv" style="color:var(--cyan)">79.71%</span></div>
+        <div class="result-row"><span class="rl">Std. deviation (residuals)</span><span class="rv">11.19 (outlier removed)</span></div>
+        <div class="result-row"><span class="rl">Std. error (residuals)</span><span class="rv">2.12</span></div>
+        <div class="result-row"><span class="rl">Sum of residuals</span><span class="rv">−7.18 × 10⁻¹³</span></div>
+        <div class="corr-bar-wrap"><div class="corr-bar" style="width:87%;background:linear-gradient(90deg,var(--amber),#fcd34d)"></div></div>
+        <div class="corr-label"><span>0</span><span>r = 0.87 — Scattering complicates Beer-Lambert</span><span>1</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="highlight-box" style="margin-top:2rem;">
+    <strong>Residual analysis:</strong> For all five liquids, the residual plots showed a fairly random scatter around zero — confirming linear models are appropriate. The histogram distributions were approximately bell-shaped (normal), with the highest frequency counts near zero. Outliers in K₂Cr₂O₇ and milk were attributed to data acquisition issues and excluded from standard deviation and standard error calculations. For scattering liquids like milk, the effective path length is longer than the cuvette width (due to scattering events), meaning Beer-Lambert law cannot be directly applied — a key motivation for the combinatorial measurement approach.
+  </div>
+
+  <!-- Absorption spectra -->
+  <div class="section-header" style="margin-top:3.5rem;">
+    <div class="section-num">05.1 — Spectra</div>
+    <h2 class="section-title" style="font-size:1.5rem;">Absorption & Transmittance Spectra</h2>
+  </div>
+  <p class="body-text">Spectra were measured using an Ocean Optics Flame USB 4000 spectrometer with a halogen lamp. The peak transmittance wavelengths (highest intensity in the normalised spectrum) were identified for each non-scattering liquid:</p>
+
+  <table class="spec-table">
+    <thead>
+      <tr>
+        <th>Liquid</th>
+        <th>Colour</th>
+        <th>Peak Transmittance Wavelength(s)</th>
+        <th>Visible Region</th>
+        <th>Behaviour</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>KMnO₄</strong></td>
+        <td>Dark violet</td>
+        <td class="wave-range">380–450 nm</td>
+        <td>Violet</td>
+        <td>Flat/near-zero intensity at all other wavelengths due to very high colour intensity</td>
+      </tr>
+      <tr>
+        <td><strong>CuSO₄</strong></td>
+        <td>Blue</td>
+        <td class="wave-range">530–570 nm</td>
+        <td>Green</td>
+        <td>Also transmits some blue-range wavelengths at lower intensity</td>
+      </tr>
+      <tr>
+        <td><strong>Co(CH₃COO)₂·4H₂O</strong></td>
+        <td>Red</td>
+        <td class="wave-range">350–360 nm / 610–700 nm</td>
+        <td>Violet + Red</td>
+        <td>Two distinct peaks; near-zero intensity between them (absorbed region)</td>
+      </tr>
+      <tr>
+        <td><strong>K₂Cr₂O₇</strong></td>
+        <td>Orange</td>
+        <td class="wave-range">350–360 nm / 575–700 nm</td>
+        <td>Violet + Orange–Red</td>
+        <td>Two peaks; absorbs all other wavelengths; violet peak possibly due to shared beaker with KMnO₄</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<hr class="section-divider">
+
+<!-- CLASSIFICATION -->
+<section class="section" id="classification">
+  <div class="section-header">
+    <div class="section-num">06 — Classification</div>
+    <h2 class="section-title">Liquid Classification Results</h2>
+    <p class="section-lead">Two approaches were evaluated for classifying all five liquids simultaneously. Both correctly identified all five liquid groups from 169 total samples.</p>
+  </div>
+
+  <p class="body-text">The combined dataset of 169 samples (all five liquids) was processed together for classification. After SVD-based dimensionality reduction, two distinct classification approaches were applied and compared.</p>
+
+  <div class="approach-split">
+    <div class="approach-block">
+      <div class="approach-label">Approach I — Statistical</div>
+      <div class="approach-title">PCA + Hierarchical Clustering</div>
+      <div class="approach-body">
+        The first three principal components of the left singular vector were plotted in a 3D scatter plot (PCA). Five distinct clusters were visible, each corresponding to one liquid. K₂Cr₂O₇ showed a slightly wider spread due to outliers.
+        <ul class="approach-list" style="margin-top:1rem;">
+          <li>PCA 3D plot clearly separated all five liquids into distinct clusters</li>
+          <li>Hierarchical dendrogram (pdist + linkage) confirmed the same five clusters plus outlier/false-negative branches</li>
+          <li>Scattering (milk) and non-scattering liquids were successfully distinguished from each other</li>
+          <li>Processing time: much faster than neural network approach</li>
+          <li>Result: simple, quick, and highly accurate — recommended primary method</li>
+        </ul>
+      </div>
+    </div>
+    <div class="approach-block">
+      <div class="approach-label">Approach II — Deep Learning</div>
+      <div class="approach-title">Artificial Neural Network</div>
+      <div class="approach-body">
+        A multi-layer neural network was trained on 16 input features (8 transmittance + 8 scattering photodiode readings). Data was structured into overlapping 32-row blocks. Six architectures were compared. The best model achieved 91.86% validation accuracy.
+        <ul class="approach-list" style="margin-top:1rem;">
+          <li>Architecture: 1 input layer + 2 hidden layers (512 nodes each, dropout) + 1 softmax output</li>
+          <li>Activation: ReLU (hidden layers), Softmax (output)</li>
+          <li>Training time: ~22 hours; evaluation: ~3 hours</li>
+          <li>Validation accuracy: 91.86% (best of 6 tested architectures)</li>
+          <li>Conclusion: less efficient than statistical approach for this task</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Neural Network Architectures -->
+  <div class="nn-section">
+    <div class="approach-label" style="margin-bottom:0.5rem;">Neural Network Architecture Comparison</div>
+    <h3 style="font-family:var(--sans);font-size:1.1rem;font-weight:700;color:var(--heading)">Six Architectures Tested — Best Model Selected by Validation Accuracy</h3>
+    <div class="nn-archs">
+      <div class="arch-card">
+        <div class="arch-name">2 × 24-node hidden layers</div>
+        <div class="arch-acc">70.53%</div>
+        <div class="arch-bar-wrap"><div class="arch-bar" style="width:70.53%"></div></div>
+      </div>
+      <div class="arch-card">
+        <div class="arch-name">4 × 24-node hidden layers</div>
+        <div class="arch-acc">71.79%</div>
+        <div class="arch-bar-wrap"><div class="arch-bar" style="width:71.79%"></div></div>
+      </div>
+      <div class="arch-card winner">
+        <div class="arch-name">2 × 512-node + dropout</div>
+        <div class="arch-acc winner-acc">91.86%</div>
+        <div class="arch-bar-wrap"><div class="arch-bar winner-bar" style="width:91.86%"></div></div>
+      </div>
+      <div class="arch-card">
+        <div class="arch-name">2 × 512-node, no dropout</div>
+        <div class="arch-acc">90.08%</div>
+        <div class="arch-bar-wrap"><div class="arch-bar" style="width:90.08%"></div></div>
+      </div>
+      <div class="arch-card">
+        <div class="arch-name">4 × 512-node, no dropout</div>
+        <div class="arch-acc">90.08%</div>
+        <div class="arch-bar-wrap"><div class="arch-bar" style="width:90.08%"></div></div>
+      </div>
+      <div class="arch-card">
+        <div class="arch-name">2 × 512-node + dropout (alt)</div>
+        <div class="arch-acc">90.10%</div>
+        <div class="arch-bar-wrap"><div class="arch-bar" style="width:90.10%"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Confusion Matrices -->
+  <div class="cm-section">
+    <div class="section-header">
+      <div class="section-num">06.1 — Performance</div>
+      <h2 class="section-title" style="font-size:1.5rem;">Confusion Matrices & Metrics</h2>
+    </div>
+    <p class="body-text">Performance of the hierarchical clustering classification was quantified using confusion matrices for all five liquids. Metrics were calculated as: Sensitivity = TP/(TP+FN); Specificity = TN/(TN+FP); Accuracy = (TP+TN)/(TP+FP+FN+TN); Precision = TP/(TP+FP).</p>
+
+    <div class="cm-grid">
+      <!-- KMnO4 -->
+      <div class="cm-card">
+        <div class="cm-card-header">
+          <div class="cm-dot" style="background:#8b00ff"></div>
+          <div>
+            <div class="cm-name">Potassium Permanganate</div>
+            <div class="cm-formula">KMnO₄</div>
+          </div>
+        </div>
+        <div class="cm-body">
+          <div class="metrics-row">
+            <div class="metric"><div class="metric-label">Sensitivity</div><div class="metric-value">0.94</div></div>
+            <div class="metric"><div class="metric-label">Specificity</div><div class="metric-value perfect">1.00</div></div>
+            <div class="metric"><div class="metric-label">Accuracy</div><div class="metric-value">0.99</div></div>
+            <div class="metric"><div class="metric-label">Precision</div><div class="metric-value perfect">1.00</div></div>
+          </div>
+          <div class="cm-matrix">
+            <div class="cm-row"><div class="cm-cell header-cell"></div><div class="cm-cell header-cell">P (actual)</div><div class="cm-cell header-cell">N (actual)</div></div>
+            <div class="cm-row"><div class="cm-cell header-cell">P (pred.)</div><div class="cm-cell tp">33</div><div class="cm-cell fp">0</div></div>
+            <div class="cm-row"><div class="cm-cell header-cell">N (pred.)</div><div class="cm-cell fn">2</div><div class="cm-cell tn">134</div></div>
+          </div>
+        </div>
+      </div>
+      <!-- CuSO4 -->
+      <div class="cm-card">
+        <div class="cm-card-header">
+          <div class="cm-dot" style="background:#1e90ff"></div>
+          <div>
+            <div class="cm-name">Copper Sulphate</div>
+            <div class="cm-formula">CuSO₄</div>
+          </div>
+        </div>
+        <div class="cm-body">
+          <div class="metrics-row">
+            <div class="metric"><div class="metric-label">Sensitivity</div><div class="metric-value">0.93</div></div>
+            <div class="metric"><div class="metric-label">Specificity</div><div class="metric-value perfect">1.00</div></div>
+            <div class="metric"><div class="metric-label">Accuracy</div><div class="metric-value">0.98</div></div>
+            <div class="metric"><div class="metric-label">Precision</div><div class="metric-value perfect">1.00</div></div>
+          </div>
+          <div class="cm-matrix">
+            <div class="cm-row"><div class="cm-cell header-cell"></div><div class="cm-cell header-cell">P (actual)</div><div class="cm-cell header-cell">N (actual)</div></div>
+            <div class="cm-row"><div class="cm-cell header-cell">P (pred.)</div><div class="cm-cell tp">37</div><div class="cm-cell fp">0</div></div>
+            <div class="cm-row"><div class="cm-cell header-cell">N (pred.)</div><div class="cm-cell fn">3</div><div class="cm-cell tn">129</div></div>
+          </div>
+        </div>
+      </div>
+      <!-- Co -->
+      <div class="cm-card">
+        <div class="cm-card-header">
+          <div class="cm-dot" style="background:#e63946"></div>
+          <div>
+            <div class="cm-name">Cobalt(II) Acetate Tet.</div>
+            <div class="cm-formula">Co(CH₃COO)₂·4H₂O</div>
+          </div>
+        </div>
+        <div class="cm-body">
+          <div class="metrics-row">
+            <div class="metric"><div class="metric-label">Sensitivity</div><div class="metric-value">0.93</div></div>
+            <div class="metric"><div class="metric-label">Specificity</div><div class="metric-value perfect">1.00</div></div>
+            <div class="metric"><div class="metric-label">Accuracy</div><div class="metric-value">0.98</div></div>
+            <div class="metric"><div class="metric-label">Precision</div><div class="metric-value perfect">1.00</div></div>
+          </div>
+          <div class="cm-matrix">
+            <div class="cm-row"><div class="cm-cell header-cell"></div><div class="cm-cell header-cell">P (actual)</div><div class="cm-cell header-cell">N (actual)</div></div>
+            <div class="cm-row"><div class="cm-cell header-cell">P (pred.)</div><div class="cm-cell tp">37</div><div class="cm-cell fp">0</div></div>
+            <div class="cm-row"><div class="cm-cell header-cell">N (pred.)</div><div class="cm-cell fn">3</div><div class="cm-cell tn">129</div></div>
+          </div>
+        </div>
+      </div>
+      <!-- K2Cr2O7 -->
+      <div class="cm-card">
+        <div class="cm-card-header">
+          <div class="cm-dot" style="background:#ffae00"></div>
+          <div>
+            <div class="cm-name">Potassium Dichromate</div>
+            <div class="cm-formula">K₂Cr₂O₇</div>
+          </div>
+        </div>
+        <div class="cm-body">
+          <div class="metrics-row">
+            <div class="metric"><div class="metric-label">Sensitivity</div><div class="metric-value warn">0.70</div></div>
+            <div class="metric"><div class="metric-label">Specificity</div><div class="metric-value perfect">1.00</div></div>
+            <div class="metric"><div class="metric-label">Accuracy</div><div class="metric-value warn">0.95</div></div>
+            <div class="metric"><div class="metric-label">Precision</div><div class="metric-value perfect">1.00</div></div>
+          </div>
+          <div class="cm-matrix">
+            <div class="cm-row"><div class="cm-cell header-cell"></div><div class="cm-cell header-cell">P (actual)</div><div class="cm-cell header-cell">N (actual)</div></div>
+            <div class="cm-row"><div class="cm-cell header-cell">P (pred.)</div><div class="cm-cell tp">21</div><div class="cm-cell fp">0</div></div>
+            <div class="cm-row"><div class="cm-cell header-cell">N (pred.)</div><div class="cm-cell fn">9</div><div class="cm-cell tn">139</div></div>
+          </div>
+        </div>
+      </div>
+      <!-- Milk -->
+      <div class="cm-card">
+        <div class="cm-card-header">
+          <div class="cm-dot" style="background:#f5f0e8;border:1px solid #555;"></div>
+          <div>
+            <div class="cm-name">Milk (Scattering)</div>
+            <div class="cm-formula">Fresh whole milk</div>
+          </div>
+        </div>
+        <div class="cm-body">
+          <div class="metrics-row">
+            <div class="metric"><div class="metric-label">Sensitivity</div><div class="metric-value perfect">1.00</div></div>
+            <div class="metric"><div class="metric-label">Specificity</div><div class="metric-value perfect">1.00</div></div>
+            <div class="metric"><div class="metric-label">Accuracy</div><div class="metric-value perfect">1.00</div></div>
+            <div class="metric"><div class="metric-label">Precision</div><div class="metric-value perfect">1.00</div></div>
+          </div>
+          <div class="cm-matrix">
+            <div class="cm-row"><div class="cm-cell header-cell"></div><div class="cm-cell header-cell">P (actual)</div><div class="cm-cell header-cell">N (actual)</div></div>
+            <div class="cm-row"><div class="cm-cell header-cell">P (pred.)</div><div class="cm-cell tp">24</div><div class="cm-cell fp">0</div></div>
+            <div class="cm-row"><div class="cm-cell header-cell">N (pred.)</div><div class="cm-cell fn">0</div><div class="cm-cell tn">145</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="highlight-box" style="margin-top:2rem;">
+      <strong>Key finding:</strong> Specificity and precision were <strong>1.00 for all five liquids</strong> — meaning no false positives were generated for any liquid in any run. Milk achieved perfect scores across all four metrics (sensitivity = specificity = accuracy = precision = 1.00), demonstrating that the scattering signature is highly distinctive. K₂Cr₂O₇ had the lowest sensitivity (0.70) likely due to its outlier samples; however, its specificity and precision still remained at 1.0.
+    </div>
+
+    <!-- Base Classification -->
+    <div class="section-header" style="margin-top:3.5rem;">
+      <div class="section-num">06.2 — Base Mix</div>
+      <h2 class="section-title" style="font-size:1.5rem;">Classification When Mixed with a Base</h2>
+    </div>
+    <p class="body-text">An additional experiment tested whether the system could distinguish neutral KMnO₄ from KMnO₄ mixed with NaOH (a strong base). This simulates real-world scenarios where a liquid may be contaminated or mixed with another substance. The hierarchical clustering dendrogram for 65 combined samples (35 KMnO₄ + 30 KMnO₄/NaOH mixtures) showed two clearly separated major clusters with outliers in a third branch.</p>
+
+    <div class="cm-grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));">
+      <div class="cm-card">
+        <div class="cm-card-header">
+          <div class="cm-dot" style="background:#8b00ff"></div>
+          <div>
+            <div class="cm-name">Neutral KMnO₄</div>
+            <div class="cm-formula">In mixed dataset with base solution</div>
+          </div>
+        </div>
+        <div class="cm-body">
+          <div class="metrics-row">
+            <div class="metric"><div class="metric-label">Sensitivity</div><div class="metric-value">0.91</div></div>
+            <div class="metric"><div class="metric-label">Specificity</div><div class="metric-value perfect">1.00</div></div>
+            <div class="metric"><div class="metric-label">Accuracy</div><div class="metric-value">0.95</div></div>
+            <div class="metric"><div class="metric-label">Precision</div><div class="metric-value perfect">1.00</div></div>
+          </div>
+          <div class="cm-matrix">
+            <div class="cm-row"><div class="cm-cell header-cell"></div><div class="cm-cell header-cell">P (actual)</div><div class="cm-cell header-cell">N (actual)</div></div>
+            <div class="cm-row"><div class="cm-cell header-cell">P (pred.)</div><div class="cm-cell tp">32</div><div class="cm-cell fp">0</div></div>
+            <div class="cm-row"><div class="cm-cell header-cell">N (pred.)</div><div class="cm-cell fn">3</div><div class="cm-cell tn">30</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="cm-card">
+        <div class="cm-card-header">
+          <div class="cm-dot" style="background:#9b59b6"></div>
+          <div>
+            <div class="cm-name">KMnO₄ + NaOH (Base Mix)</div>
+            <div class="cm-formula">30 mixed samples in 65-sample dataset</div>
+          </div>
+        </div>
+        <div class="cm-body">
+          <div class="metrics-row">
+            <div class="metric"><div class="metric-label">Sensitivity</div><div class="metric-value">0.90</div></div>
+            <div class="metric"><div class="metric-label">Specificity</div><div class="metric-value perfect">1.00</div></div>
+            <div class="metric"><div class="metric-label">Accuracy</div><div class="metric-value">0.95</div></div>
+            <div class="metric"><div class="metric-label">Precision</div><div class="metric-value perfect">1.00</div></div>
+          </div>
+          <div class="cm-matrix">
+            <div class="cm-row"><div class="cm-cell header-cell"></div><div class="cm-cell header-cell">P (actual)</div><div class="cm-cell header-cell">N (actual)</div></div>
+            <div class="cm-row"><div class="cm-cell header-cell">P (pred.)</div><div class="cm-cell tp">27</div><div class="cm-cell fp">0</div></div>
+            <div class="cm-row"><div class="cm-cell header-cell">N (pred.)</div><div class="cm-cell fn">3</div><div class="cm-cell tn">35</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="section-divider">
+
+<!-- CONCLUSION -->
+<section class="section" id="conclusion">
+  <div class="section-header">
+    <div class="section-num">07 — Conclusion</div>
+    <h2 class="section-title">Discussion & Conclusions</h2>
+  </div>
+
+  <div class="conclusion-block">
+    <p>The combinatorial optical property measuring system was successfully designed, constructed, and validated. It delivers non-destructive, non-invasive, high-accuracy, and near-instant measurements with machine vision — a full sample scan completed in just 15 seconds.</p>
+
+    <p>Three reasons drove the need for combinatorial measurements: (1) light propagates through the quartz tube in complex paths, requiring a full photodiode array to capture all rays; (2) a photodiode array enables simultaneous detection of scattered and transmitted light; (3) Rayleigh scattering affects both short and long wavelengths differently, and the multi-detector layout captures both regimes.</p>
+
+    <p>For concentration quantification, all four non-scattering liquids yielded correlation coefficients above 0.85 (with KMnO₄ and CuSO₄ at 0.99), and the scattering liquid milk achieved r = 0.87 — demonstrating strong predictive power across both liquid types. All residual plots were randomly distributed around zero, confirming the appropriateness of linear models.</p>
+
+    <p>For classification, both PCA/hierarchical clustering and the neural network successfully separated all five liquids. The statistical method was faster, simpler, and comparably accurate (specificity and precision = 1.0 for all liquids; milk achieved 100% on all four metrics), while the neural network required ~22 hours to train and achieved 91.86% validation accuracy. The statistical approach is therefore preferred for this application.</p>
+
+    <p>The device also demonstrated the ability to classify liquids when mixed with a base solution, distinguishing neutral KMnO₄ from KMnO₄+NaOH mixtures with 95% accuracy and 100% specificity — a capability with direct practical relevance.</p>
+  </div>
+
+  <div class="section-header" style="margin-top:3.5rem;">
+    <div class="section-num">07.1 — Future Work</div>
+    <h2 class="section-title" style="font-size:1.5rem;">Further Implementation</h2>
+  </div>
+
+  <div class="future-cards">
+    <div class="future-card">
+      <h4>🔬 Inelastic Optical Properties (Fluorescence)</h4>
+      <p>The quartz sample holder was deliberately chosen because it transmits UV wavelengths (unlike glass), enabling future measurement of fluorescence — an inelastic optical property where wavelength and intensity change. Voltage-controlled current drivers would be needed to maintain constant power over time for inelastic measurements.</p>
+    </div>
+    <div class="future-card">
+      <h4>📐 Improved Scattering Quantification</h4>
+      <p>Beer-Lambert law cannot be directly applied to scattering liquids because the effective light path length is unknown (it exceeds the physical cuvette width due to scattering events). Further work is needed to develop a more accurate quantification model for scattering liquids beyond the SVD matrix approach.</p>
+    </div>
+    <div class="future-card">
+      <h4>🏭 Industrial Quality Control</h4>
+      <p>The system is well-suited for automated liquid quality control in manufacturing environments — for example, monitoring soft drinks or beverages on production lines without operator involvement. The device can detect deviations from a trained liquid profile even when the contaminant is present in small quantities.</p>
+    </div>
+    <div class="future-card">
+      <h4>📱 Miniaturisation & Mobile Interface</h4>
+      <p>The system could be miniaturised using a single-board computer such as a Raspberry Pi Zero, with a companion mobile application to control the device and acquire data remotely — eliminating the need for a desktop computer and large display. This would enable portable field deployment.</p>
+    </div>
+  </div>
+</section>
+
+<hr class="section-divider">
+
+<!-- ABBREVIATIONS -->
+<section class="section" id="abbrev">
+  <div class="section-header">
+    <div class="section-num">08 — Reference</div>
+    <h2 class="section-title">Abbreviations</h2>
+  </div>
+  <div style="max-width:500px">
+    <table class="abbrev-table">
+      <tr><td>DAQ</td><td>Data Acquisition</td></tr>
+      <tr><td>DRS</td><td>Diffuse Reflectance Spectroscopy</td></tr>
+      <tr><td>LDA</td><td>Linear Discriminant Analysis</td></tr>
+      <tr><td>LED</td><td>Light Emitting Diode</td></tr>
+      <tr><td>PCA</td><td>Principal Component Analysis</td></tr>
+      <tr><td>PVDF</td><td>Polyvinylidene Fluoride</td></tr>
+      <tr><td>SVD</td><td>Singular Value Decomposition</td></tr>
+      <tr><td>ReLU</td><td>Rectified Linear Unit</td></tr>
+      <tr><td>MCU</td><td>Microcontroller Unit</td></tr>
+      <tr><td>ADC</td><td>Analogue-to-Digital Converter</td></tr>
+      <tr><td>TP / FP</td><td>True Positive / False Positive</td></tr>
+      <tr><td>TN / FN</td><td>True Negative / False Negative</td></tr>
+    </table>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-title">Combinatorial Optical Property Measuring System</div>
+  <p>S.A.D.A. Dayarathna — BSc Special Degree in Engineering Physics</p>
+  <p>University of Colombo, Sri Lanka — December 2018</p>
+  <p style="margin-top:0.8rem;color:var(--border-bright);">Supervisor: Dr. Hiran H.E. Jayaweera, Dept. of Physics, University of Colombo</p>
+</footer>
+
+<script>
+  // Animate correlation bars on load
+  document.addEventListener('DOMContentLoaded', () => {
+    const bars = document.querySelectorAll('.corr-bar, .arch-bar');
+    bars.forEach(bar => {
+      const w = bar.style.width;
+      bar.style.width = '0%';
+      setTimeout(() => { bar.style.width = w; }, 300);
+    });
+  });
+</script>
+</body>
+</html>
